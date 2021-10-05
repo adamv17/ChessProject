@@ -1,10 +1,10 @@
 import pandas as pd
 
 
-def get_data():
+def get_data() -> pd.Series:
     games = pd.read_csv('games.csv')
-    moves = games['moves']
-    return moves
+    return games['moves']
 
 
-get_data()
+d = get_data()
+print(d)
