@@ -8,7 +8,9 @@ from Piece import Piece
 
 
 class Board(Layout):
-    position: dict
+    position: dict  # a dictionary of the current chess position
+    coord: dict  # the coordinates (x, y) for each square
+    notation: list  # the move notation
 
     def __init__(self):
         super().__init__()
@@ -26,10 +28,17 @@ class Board(Layout):
 
     def reverse_move(self):
         move = self.notation.pop(-1)
-        self.play_to_position()
+        self.play_to_position(self.notation)
 
-    def play_to_position(self):
-        pass
+    def play_to_position(self, notation: list):
+        self.position = copy.deepcopy(Constants.START_POSITION)
+        for i, move in enumerate(notation):
+            name, squares, special, castle = Utils.notation_to_board(move, Utils.get_color(i + 1))
+            # TODO: continue writing this method
+
+    def play_move(self, name: str, squares: list[str], special: list[bool], castle: int):
+        if castle == 2:
+            pass
 
     def is_square_empty(self, square: str) -> bool:
         return self.position[square] == "-"

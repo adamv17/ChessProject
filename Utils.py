@@ -5,6 +5,8 @@ from Constants import START_POSITION
 from Constants import XY_FIRST_SQUARE
 from Constants import DELTA_SQUARE
 
+# TODO: add doc
+
 
 def notation_to_board(move: str, color: str) -> (str, list[str], list[bool], int):
     """
