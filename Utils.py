@@ -5,6 +5,9 @@ from Constants import START_POSITION
 from Constants import XY_FIRST_SQUARE
 from Constants import DELTA_SQUARE
 
+import numpy as np
+
+
 # TODO: add doc
 
 
@@ -97,6 +100,16 @@ def invert_dict(dictionary: dict) -> dict:
     return dict(map(reversed, dictionary.items()))
 
 
+def dict_to_numpy(dictionary: dict) -> np.array:
+    """
+    :param dictionary:
+    :return:
+    """
+    data = list(dictionary.values())
+    array = np.array(data)
+    return array.reshape(8, 8)
+
+
 def get_coord() -> dict:
     """
     :return:
@@ -105,7 +118,7 @@ def get_coord() -> dict:
     keys = START_POSITION.keys()
     for i, k in enumerate(keys):
         coord[k] = ((i % 8) * DELTA_SQUARE + XY_FIRST_SQUARE[0],
-                    (-1) * (i // 8) * DELTA_SQUARE + XY_FIRST_SQUARE[1])
+                    (i // 8) * DELTA_SQUARE + XY_FIRST_SQUARE[1])
     return coord
 
 

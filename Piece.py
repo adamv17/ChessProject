@@ -1,4 +1,8 @@
 from kivy.uix.scatter import Scatter
+from kivy.uix.image import Image
+import Utils
+
+import Constants
 
 
 class Piece(Scatter):
@@ -11,12 +15,15 @@ class Piece(Scatter):
         self.piece_name = piece_name
         self.piece_color = piece_color
         self.square = square
+        image = Image(source=Constants.PIECES[piece_name])
+        image.size = (80, 80)
+        self.add_widget(image)
 
     def update_square(self, square: str):
         self.square = square
 
     def get_close_square(self) -> str:
-        for sq in self.parent.coord.keys():
+        for sq in Constants.START_POSITION.keys():
             if self.is_on_square(self.parent.coord[sq][0], self.parent.coord[sq][1]):
                 return sq
 
@@ -43,3 +50,11 @@ class Piece(Scatter):
         if self.parent.legal_move():
             self.parent.update_position(self, sq)
             played = self.move_to_square(sq)
+            return played
+        return False
+
+    def on_touch_up(self, touch):
+        if self.collide_point(*touch.pos):
+            played = self.move()
+
+

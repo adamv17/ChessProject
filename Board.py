@@ -5,26 +5,24 @@ import copy
 
 import Utils
 from Piece import Piece
+import numpy as np
 
 
-class Board(Layout):
+class Board:
     position: dict  # a dictionary of the current chess position
-    coord: dict  # the coordinates (x, y) for each square
+    board: np.array # the position as a char numpy array
     notation: list  # the move notation
 
     def __init__(self):
-        super().__init__()
         self.position = copy.deepcopy(Constants.START_POSITION)
-        self.coord = Utils.get_coord()
+        self.board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
     def update_position(self, piece: Piece, square: str):
         self.position[piece.square] = "-"
         self.position[square] = piece.piece_name
         piece.update_square(square)
-
-    def legal_move(self) -> bool:
-        pass
+        print(self.position)
 
     def reverse_move(self):
         move = self.notation.pop(-1)
