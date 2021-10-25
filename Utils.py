@@ -7,7 +7,12 @@ from Constants import DELTA_SQUARE
 
 
 def notation_to_board(move: str, color: str) -> (str, list[str], list[bool], int):
-    piece_name = None
+    """
+    :param move:
+    :param color:
+    :return:
+    """
+    piece_name = None  # the name of the piece
     squares = [None, None]  # to square, row or column letter hint
     special = [False, False, False, False]  # check, capture, checkmate, promotion
     castle = 2  # whether the player has castled short (0) or long (1)
@@ -39,6 +44,14 @@ def notation_to_board(move: str, color: str) -> (str, list[str], list[bool], int
 
 def board_to_notation(piece_name: str, squares: list[str], special: list[bool], castle: int,
                       promotion_piece: str) -> str:
+    """
+    :param piece_name:
+    :param squares:
+    :param special:
+    :param castle:
+    :param promotion_piece:
+    :return:
+    """
     if castle == 0:
         return "O-O"
     elif castle == 1:
@@ -66,20 +79,40 @@ def board_to_notation(piece_name: str, squares: list[str], special: list[bool], 
 
 
 def get_piece_name(piece_type: str, color: str) -> str:
+    """
+    :param piece_type:
+    :param color:
+    :return:
+    """
     return piece_type if color == 'w' else piece_type.lower()
 
 
 def invert_dict(dictionary: dict) -> dict:
+    """
+    :param dictionary:
+    :return:
+    """
     return dict(map(reversed, dictionary.items()))
 
 
 def get_coord() -> dict:
+    """
+    :return:
+    """
     coord = {}
     keys = START_POSITION.keys()
     for i, k in enumerate(keys):
         coord[k] = ((i % 8) * DELTA_SQUARE + XY_FIRST_SQUARE[0],
                     (-1) * (i // 8) * DELTA_SQUARE + XY_FIRST_SQUARE[1])
     return coord
+
+
+def get_color(turn: int) -> str:
+    """
+    :param turn:
+    :return:
+    """
+    return 'w' if turn % 2 == 1 else 'b'
 
 
 print(get_coord())
