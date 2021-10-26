@@ -130,6 +130,10 @@ def get_color(turn: int) -> str:
     return 'w' if turn % 2 == 1 else 'b'
 
 
+def opposite_color(color: str) -> str:
+    return 'w' if color == 'b' else 'b'
+
+
 print(get_coord())
 
 name, sq, bol, cas = notation_to_board('Rcxc4#', 'b')

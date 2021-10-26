@@ -45,16 +45,25 @@ class Piece(Scatter):
         self.set_square(self.square)
         return False
 
-    def move(self):
+    def move(self) -> bool:
         sq: str = self.get_close_square()
-        if self.parent.legal_move():
+        if self.parent.legal_move() and sq != self.square:
             self.parent.update_position(self, sq)
             played = self.move_to_square(sq)
             return played
+        self.set_square(self.square)
         return False
+
+    def on_touch_down(self, touch):
+        if self.do_translation:
+            return super().on_touch_down(touch)
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
             played = self.move()
+            if played:
+                self.parent.disable_pieces(self.piece_color)
+                self.parent.enable_pieces(Utils.opposite_color(self.piece_color))
+        return super().on_touch_up(touch)
 
 

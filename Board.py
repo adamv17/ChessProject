@@ -10,7 +10,7 @@ import numpy as np
 
 class Board:
     position: dict  # a dictionary of the current chess position
-    board: np.array # the position as a char numpy array
+    board: np.array  # the position as a char numpy array
     notation: list  # the move notation
 
     def __init__(self):
@@ -22,7 +22,9 @@ class Board:
         self.position[piece.square] = "-"
         self.position[square] = piece.piece_name
         piece.update_square(square)
-        print(self.position)
+
+    def update_notation(self):
+        pass
 
     def reverse_move(self):
         move = self.notation.pop(-1)

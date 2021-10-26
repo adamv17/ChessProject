@@ -20,11 +20,14 @@ class ChessGame(Layout):
         self.coord = Utils.get_coord()
 
         self.pieces = []
+        self.white_pieces = []
+        self.black_pieces = []
         squares = list(Constants.START_POSITION.keys())
         # initialize white pieces
         for wsq in squares[0:16]:
             name = Constants.START_POSITION[wsq]
             piece = Piece(name, 'w', wsq)
+            self.white_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
             piece.set_square(wsq)
@@ -32,9 +35,20 @@ class ChessGame(Layout):
         for bsq in squares[48:64]:
             name = Constants.START_POSITION[bsq]
             piece = Piece(name, 'b', bsq)
+            self.black_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
             piece.set_square(bsq)
+
+    def disable_pieces(self, color: str):
+        pieces = self.white_pieces if color == 'w' else self.black_pieces
+        for p in pieces:
+            p.do_translation = False
+
+    def enable_pieces(self, color: str):
+        pieces = self.white_pieces if color == 'w' else self.black_pieces
+        for p in pieces:
+            p.do_translation = True
 
     def graphics(self):
         pass
@@ -42,6 +56,6 @@ class ChessGame(Layout):
     def legal_move(self) -> bool:
         return True
 
-    def update_position(self, piece, sq):
+    def update_position(self, piece: Piece, sq: str):
         self.board.update_position(piece, sq)
 
