@@ -40,6 +40,8 @@ class ChessGame(Layout):
             self.add_widget(piece)
             piece.set_square(bsq)
 
+        self.disable_pieces('b')
+
     def disable_pieces(self, color: str):
         pieces = self.white_pieces if color == 'w' else self.black_pieces
         for p in pieces:

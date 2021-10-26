@@ -45,10 +45,17 @@ class Piece(Scatter):
         self.set_square(self.square)
         return False
 
+    def capture(self, sq: str):
+        for p in self.parent.pieces:
+            if p.square == sq and self.piece_color != p.piece_color:
+                self.parent.remove_widget(p)
+
     def move(self) -> bool:
         sq: str = self.get_close_square()
         if self.parent.legal_move() and sq != self.square:
-            self.parent.update_position(self, sq)
+            captured = self.parent.update_position(self, sq)
+            if captured != "-":
+                self.capture(sq)
             played = self.move_to_square(sq)
             return played
         self.set_square(self.square)

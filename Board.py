@@ -18,10 +18,12 @@ class Board:
         self.board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
-    def update_position(self, piece: Piece, square: str):
+    def update_position(self, piece: Piece, square: str) -> str:
+        captured = self.position[square]
         self.position[piece.square] = "-"
         self.position[square] = piece.piece_name
         piece.update_square(square)
+        return captured
 
     def update_notation(self):
         pass
