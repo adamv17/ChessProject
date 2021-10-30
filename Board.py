@@ -3,6 +3,7 @@ from kivy.uix.layout import Layout
 import Constants
 import copy
 
+from Logic import Logic
 import Utils
 from Piece import Piece
 import numpy as np
@@ -17,6 +18,7 @@ class Board:
         self.position = copy.deepcopy(Constants.START_POSITION)
         self.board = Utils.dict_to_numpy(self.position)
         self.notation = []
+        print(Logic.knight(self.board, 'g1', 'w'))
 
     def update_position(self, piece: Piece, square: str) -> str:
         captured = self.position[square]

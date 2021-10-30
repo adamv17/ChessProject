@@ -105,7 +105,7 @@ def dict_to_numpy(dictionary: dict) -> np.array:
     :param dictionary:
     :return:
     """
-    data = list(dictionary.values())
+    data = list(dictionary.keys())
     array = np.array(data)
     return array.reshape(8, 8)
 
@@ -134,14 +134,15 @@ def opposite_color(color: str) -> str:
     return 'w' if color == 'b' else 'b'
 
 
-print(get_coord())
+def get_index(sq: str) -> tuple:
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    j = letters.index(sq[0])
+    i = int(sq[1]) - 1
+    return i, j
 
-name, sq, bol, cas = notation_to_board('Rcxc4#', 'b')
 
-print("name =", name)
-print("sq =", sq)
-print("bol =", bol)
-print("cas =", cas)
+def borders(index: int) -> bool:
+    return 0 <= index <= 7
 
-n = board_to_notation('P', ['e8', 'd'], [False, True, True, True], 2, 'Q')
-print(n)
+
+COORD = get_coord()

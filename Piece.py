@@ -24,7 +24,7 @@ class Piece(Scatter):
 
     def get_close_square(self) -> str:
         for sq in Constants.START_POSITION.keys():
-            if self.is_on_square(self.parent.coord[sq][0], self.parent.coord[sq][1]):
+            if self.is_on_square(Utils.COORD[sq][0], Utils.COORD[sq][1]):
                 return sq
 
         return "-"
@@ -33,7 +33,7 @@ class Piece(Scatter):
         return self.collide_point(x, y)
 
     def set_square(self, square: str):
-        coordinate = self.parent.coord[square]
+        coordinate = Utils.COORD[square]
         self.set_center_x(coordinate[0])
         self.set_center_y(coordinate[1])
         self.square = square

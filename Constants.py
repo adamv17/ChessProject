@@ -41,3 +41,5 @@ PIECES = {
     "Q": os.path.join(ROOT_DIR, "images/white-queen.png"),
     "K": os.path.join(ROOT_DIR, "images/white-king.png")
 }
+
+

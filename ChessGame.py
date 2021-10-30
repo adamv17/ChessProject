@@ -17,7 +17,6 @@ class ChessGame(Layout):
         self.board_image.pos = (100, 0)
         self.board_image.size = (600, 600)
         self.add_widget(self.board_image)
-        self.coord = Utils.get_coord()
 
         self.pieces = []
         self.white_pieces = []
