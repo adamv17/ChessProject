@@ -11,14 +11,14 @@ import numpy as np
 
 class Board:
     position: dict  # a dictionary of the current chess position
-    board: np.array  # the position as a char numpy array
+    sq_board: np.array  # the position as a char numpy array
     notation: list  # the move notation
 
     def __init__(self):
         self.position = copy.deepcopy(Constants.START_POSITION)
-        self.board = Utils.dict_to_numpy(self.position)
+        self.sq_board = Utils.dict_to_numpy(self.position)
         self.notation = []
-        print(Logic.knight(self.board, 'g1', 'w'))
+        print(Logic.knight(self.sq_board, 'g1', 'w'))
 
     def update_position(self, piece: Piece, square: str) -> str:
         captured = self.position[square]

@@ -51,13 +51,13 @@ class Logic:
         k_sec = idx[0] + idx[1] - 7  # k for secondary diagonal
         sec_d = Logic.get_k_diag(np.flipud(board), k_sec)  # vertical flip
 
-        possible_moves = []
-        Logic.filter_possible_moves()
+        possible_moves = list(np.concatenate((main_d, sec_d)))
+        # Logic.filter_possible_moves()
 
         return possible_moves
 
     @staticmethod
-    def get_k_diag(board: np.array, k: int):
+    def get_k_diag(board: np.array, k: int) -> np.array:
         """
         :param board:
         :param k:
@@ -73,8 +73,8 @@ class Logic:
         idx = Utils.get_index(sq)
         row = board[idx[0]]
         col = board[:, idx[1]]
-        possible_moves = []
-        Logic.filter_possible_moves()
+        possible_moves = list(np.concatenate((row, col)))
+        # Logic.filter_possible_moves()
         return possible_moves
 
     @staticmethod

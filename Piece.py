@@ -52,7 +52,7 @@ class Piece(Scatter):
 
     def move(self) -> bool:
         sq: str = self.get_close_square()
-        if self.parent.legal_move() and sq != self.square:
+        if self.parent.legal_move(self, sq) and sq != self.square:
             captured = self.parent.update_position(self, sq)
             if captured != "-":
                 self.capture(sq)
