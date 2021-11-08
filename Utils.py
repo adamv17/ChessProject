@@ -1,6 +1,7 @@
 """
 Utils class, contains all utility functions that are modular and unrelated to the User or the Engine.
 """
+import Utils
 from Constants import START_POSITION
 from Constants import XY_FIRST_SQUARE
 from Constants import DELTA_SQUARE
@@ -130,6 +131,10 @@ def get_color(turn: int) -> str:
     return 'w' if turn % 2 == 1 else 'b'
 
 
+def get_color_piece(piece: str):
+    return 'w' if piece.isupper() else 'b'
+
+
 def opposite_color(color: str) -> str:
     return 'w' if color == 'b' else 'b'
 
@@ -145,4 +150,23 @@ def borders(index: int) -> bool:
     return 0 <= index <= 7
 
 
+def delete_sq(lst: list, sq: str) -> list:
+    return list(filter(sq.__ne__, lst))
+
+
+def flip_ray(ray: np.array, sq: str) -> np.array:
+    if ray[0] != sq:
+        return ray[::-1]
+    return ray
+
+
+def split(moves: np.array, sq: str) -> (np.array, np.array):
+    idx = int(np.where(moves == sq)[0])
+    if idx == 0:
+        return moves, None
+    return moves[0: idx + 1], moves[idx:]
+
+
 COORD = get_coord()
+# b = Utils.split(np.array(['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8']), 'e5')
+# print(b)

@@ -64,13 +64,13 @@ class ChessGame(Layout):
             possible_moves = Logic.pawn()
             return True
         if upper_name == 'N':
-            possible_moves = Logic.knight(self.board.sq_board, piece.square, color)
+            possible_moves = Logic.knight(self.board, piece.square, color)
         if upper_name == 'B':
-            possible_moves = Logic.bishop(self.board.sq_board, piece.square, color)
+            possible_moves = Logic.bishop(self.board, piece.square, color)
         if upper_name == 'R':
-            possible_moves = Logic.rook(self.board.sq_board, piece.square, color)
+            possible_moves = Logic.rook(self.board, piece.square, color)
         if upper_name == 'Q':
-            possible_moves = Logic.queen(self.board.sq_board, piece.square, color)
+            possible_moves = Logic.queen(self.board, piece.square, color)
         if upper_name == 'K':
             possible_moves = Logic.king()
             return True
