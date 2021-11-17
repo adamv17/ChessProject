@@ -68,7 +68,7 @@ def board_to_notation(piece_name: str, squares: list[str], special: list[bool], 
             notation_list.append(squares[1] + 'x')
     else:
         notation_list.append(piece_name)
-        if squares[1] is not None:
+        if squares[1]:
             notation_list.append(squares[1])
         if special[1]:
             notation_list.append('x')
@@ -115,7 +115,7 @@ def get_coord() -> dict:
     """
     :return:
     """
-    coord = {}
+    coord: dict = {}
     keys = START_POSITION.keys()
     for i, k in enumerate(keys):
         coord[k] = ((i % 8) * DELTA_SQUARE + XY_FIRST_SQUARE[0],
@@ -131,7 +131,7 @@ def get_color(turn: int) -> str:
     return 'w' if turn % 2 == 1 else 'b'
 
 
-def get_color_piece(piece: str):
+def get_color_piece(piece: str) -> str:
     return 'w' if piece.isupper() else 'b'
 
 
@@ -141,8 +141,8 @@ def opposite_color(color: str) -> str:
 
 def get_index(sq: str) -> tuple:
     letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-    j = letters.index(sq[0])
-    i = int(sq[1]) - 1
+    j: int = letters.index(sq[0])
+    i: int = int(sq[1]) - 1
     return i, j
 
 

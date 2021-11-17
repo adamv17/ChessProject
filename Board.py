@@ -19,21 +19,32 @@ class Board:
         self.notation = []
 
     def update_position(self, piece: Piece, square: str) -> str:
-        captured = self.position[square]
+        captured_piece: str = self.position[square]
+        print(captured_piece)
+        captured: bool = captured_piece != "-"
+        tmp = piece.square
         self.position[piece.square] = "-"
         self.position[square] = piece.piece_name
         piece.update_square(square)
-        return captured
+        notation_move: str = Utils.board_to_notation(
+            piece.piece_name.upper(),
+            [square, tmp[0] if captured else None],
+            [False, captured, False, False],
+            2, ''
+        )
+        self.update_notation(notation_move)
+        return captured_piece
 
-    def update_notation(self):
-        pass
+    def update_notation(self, move: str):
+        self.notation.append(move)
+        print(self.notation)
 
     def reverse_move(self):
         move = self.notation.pop(-1)
         self.play_to_position(self.notation)
 
     def play_to_position(self, notation: list):
-        self.position = copy.deepcopy(Constants.START_POSITION)
+        self.position: dict = copy.deepcopy(Constants.START_POSITION)
         for i, move in enumerate(notation):
             name, squares, special, castle = Utils.notation_to_board(move, Utils.get_color(i + 1))
             # TODO: continue writing this method
@@ -47,3 +58,4 @@ class Board:
 
     def position_to_graphics(self):
         pass
+

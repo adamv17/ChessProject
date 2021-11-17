@@ -18,6 +18,7 @@ class Piece(Scatter):
         image = Image(source=Constants.PIECES[piece_name])
         image.size = (80, 80)
         self.add_widget(image)
+        self.moved = False
 
     def update_square(self, square: str):
         self.square = square
@@ -65,12 +66,17 @@ class Piece(Scatter):
         if self.do_translation:
             return super().on_touch_down(touch)
 
+    def on_touch_move(self, touch):
+        self.moved = True
+        return super().on_touch_move(touch)
+
     def on_touch_up(self, touch):
-        if self.collide_point(*touch.pos):
+        if self.collide_point(*touch.pos) and self.moved:
             played = self.move()
             if played:
                 self.parent.disable_pieces(self.piece_color)
                 self.parent.enable_pieces(Utils.opposite_color(self.piece_color))
+        self.moved = False
         return super().on_touch_up(touch)
 
 

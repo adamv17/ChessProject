@@ -1,5 +1,7 @@
 from kivy.uix.layout import Layout
+# from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
+from kivy.core.window import Window
 import Utils
 from Piece import Piece
 import numpy as np
@@ -13,6 +15,7 @@ import Constants
 class ChessGame(Layout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        Window.fullscreen = True
         self.board = Board()
         self.board_image = Image(source=os.path.join(Constants.ROOT_DIR, "images/marble-chessboard.jpg"))
         self.board_image.pos = (100, 0)
@@ -61,8 +64,7 @@ class ChessGame(Layout):
         color = piece.piece_color
         possible_moves = []
         if upper_name == 'P':
-            possible_moves = Logic.pawn()
-            return True
+            possible_moves = Logic.pawn(self.board, piece.square, color)
         if upper_name == 'N':
             possible_moves = Logic.knight(self.board, piece.square, color)
         if upper_name == 'B':
@@ -72,7 +74,7 @@ class ChessGame(Layout):
         if upper_name == 'Q':
             possible_moves = Logic.queen(self.board, piece.square, color)
         if upper_name == 'K':
-            possible_moves = Logic.king()
+            possible_moves = Logic.king(self.board, piece.square, color)
             return True
 
         if not possible_moves:  # if possible moves is empty
