@@ -111,15 +111,15 @@ def dict_to_numpy(dictionary: dict) -> np.array:
     return array.reshape(8, 8)
 
 
-def get_coord() -> dict:
+def get_coord(delta, first) -> dict:
     """
     :return:
     """
     coord: dict = {}
     keys = START_POSITION.keys()
     for i, k in enumerate(keys):
-        coord[k] = ((i % 8) * DELTA_SQUARE + XY_FIRST_SQUARE[0],
-                    (i // 8) * DELTA_SQUARE + XY_FIRST_SQUARE[1])
+        coord[k] = ((i % 8) * delta + first[0],
+                    (i // 8) * delta + first[1])
     return coord
 
 
@@ -166,7 +166,5 @@ def split(moves: np.array, sq: str) -> (np.array, np.array):
         return moves, None
     return moves[0: idx + 1], moves[idx:]
 
-
-COORD = get_coord()
 # b = Utils.split(np.array(['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8']), 'e5')
 # print(b)

@@ -4,7 +4,6 @@ import Constants
 import copy
 
 import Utils
-from Piece import Piece
 import numpy as np
 
 
@@ -18,13 +17,8 @@ class Board:
         self.sq_board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
-    def update_position(self, piece: Piece, square: str) -> str:
-        captured_piece: str = self.position[square]
-        print(captured_piece)
-        captured: bool = captured_piece != "-"
-        tmp = piece.square
-        self.position[piece.square] = "-"
-        self.position[square] = piece.piece_name
+    def update_game(self, piece, square: str) -> str:
+        captured_piece, captured, tmp = self.update_position(piece, square)
         piece.update_square(square)
         notation_move: str = Utils.board_to_notation(
             piece.piece_name.upper(),
@@ -34,6 +28,15 @@ class Board:
         )
         self.update_notation(notation_move)
         return captured_piece
+
+    def update_position(self, piece, square: str):
+        captured_piece: str = self.position[square]
+        print(captured_piece)
+        captured: bool = captured_piece != "-"
+        tmp = piece.square
+        self.position[piece.square] = "-"
+        self.position[square] = piece.piece_name
+        return captured_piece, captured, tmp
 
     def update_notation(self, move: str):
         self.notation.append(move)

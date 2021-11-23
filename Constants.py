@@ -5,6 +5,9 @@ import os.path
 
 XY_FIRST_SQUARE = (145, 50)
 DELTA_SQUARE = 75.5
+
+XY_FIRST_SQUARE_FULL = (350, 55)
+DELTA_SQUARE_FULL = 82
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UNICODE_PIECE_SYMBOLS = {
