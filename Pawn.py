@@ -1,4 +1,7 @@
 from Piece import Piece
+from Board import Board
+import numpy as np
+import Utils
 
 
 class Pawn(Piece):
@@ -7,6 +10,12 @@ class Pawn(Piece):
         self.promotion = False
 
     def moves(self, board: Board, sq: str) -> list:
+        """
+
+        :param board: the current board position
+        :param sq: the current square of the piece
+        :return: the possible moves of the piece
+        """
         idx: tuple = Utils.get_index(sq)
         row: int = idx[0] - 1
         is_white = self.piece_color == 'w'
@@ -23,14 +32,14 @@ class Pawn(Piece):
         en = [False, False]
         for i in range(1, 3):
             try:
-                en[i - 1] = Logic.en_passant(board, possible_moves[i], self.piece_color)
+                en[i - 1] = self.en_passant(board, possible_moves[i])
                 sq_en[i - 1] = possible_moves[i]
             except IndexError:
                 en[i - 1] = False
         for i, m in enumerate(possible_moves):
             if abs(Utils.get_index(m)[1] - idx[1]) == 1 and board.is_square_empty(m):
                 del possible_moves[i]
-        possible_moves = Logic.filter_possible_moves(board, possible_moves, color, False)
+        possible_moves = self.filter_possible_moves(board, possible_moves, False)
 
         if en[0]:
             possible_moves.append(sq_en[0])
@@ -48,4 +57,3 @@ class Pawn(Piece):
         if self.piece_color == 'w':
             return last_move[0] + str(int(last_move[1]) + 1) == sq and board.is_square_empty(sq)
         return last_move[0] + str(int(last_move[1]) - 1) == sq and board.is_square_empty(sq)
-

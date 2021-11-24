@@ -1,4 +1,6 @@
 from Piece import Piece
+from Board import Board
+import Utils
 
 
 class King(Piece):
@@ -6,6 +8,11 @@ class King(Piece):
         super().__init__(piece_name, piece_color, square)
 
     def moves(self, board: Board, sq: str):
+        """
+        :param board: the current board position
+        :param sq: the current square of the piece
+        :return: the possible moves of the piece
+        """
         idx = Utils.get_index(sq)
         possible_moves = []
         for d in [(1, 1), (1, 0), (0, 1), (1, -1), (-1, 1), (-1, 0), (0, -1), (-1, -1)]:

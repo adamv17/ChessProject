@@ -1,4 +1,7 @@
 from Piece import Piece
+from Board import Board
+import numpy as np
+import Utils
 
 
 class Knight(Piece):
@@ -7,9 +10,9 @@ class Knight(Piece):
 
     def moves(self, board: Board, sq: str) -> list:
         """
-        :param board:
-        :param sq:
-        :return:
+        :param board: the current board position
+        :param sq: the current square of the piece
+        :return: the possible moves of the piece
         """
         idx: tuple = Utils.get_index(sq)
         moves = []
@@ -19,5 +22,4 @@ class Knight(Piece):
             if Utils.borders(move[0]) and Utils.borders(move[1]):
                 moves.append(board.sq_board[move[0]][move[1]])
 
-        moves: list = self.filter_possible_moves(board, moves, False)
-        return moves
+        return self.filter_possible_moves(board, moves, False)

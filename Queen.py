@@ -1,4 +1,7 @@
 from Piece import Piece
+from Board import Board
+from Bishop import Bishop
+from Rook import Rook
 
 
 class Queen(Piece):
@@ -6,7 +9,12 @@ class Queen(Piece):
         super().__init__(piece_name, piece_color, square)
 
     def moves(self, board: Board, sq: str):
+        """
+        :param board: the current board position
+        :param sq: the current square of the piece
+        :return: the possible moves of the piece
+        """
         diag_moves: list = Bishop.moves(self, board, sq)
         perp_moves: list = Rook.moves(self, board, sq)
-        possible_moves: list = diag_moves + perp_moves
-        return possible_moves
+        return diag_moves + perp_moves
+

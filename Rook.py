@@ -1,4 +1,7 @@
 from Piece import Piece
+from Board import Board
+import numpy as np
+import Utils
 
 
 class Rook(Piece):
@@ -7,9 +10,9 @@ class Rook(Piece):
 
     def moves(self, board: Board, sq: str) -> list:
         """
-        :param board:
-        :param sq:
-        :return:
+        :param board: the current board position
+        :param sq: the current square of the piece
+        :return: the possible moves of the piece
         """
         idx: tuple = Utils.get_index(sq)
         row: np.array = board.sq_board[idx[0]]

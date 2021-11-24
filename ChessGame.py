@@ -1,5 +1,4 @@
 from kivy.uix.layout import Layout
-# from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.core.window import Window
 import Utils
@@ -32,7 +31,7 @@ class ChessGame(Layout):
         # initialize white pieces
         for wsq in squares[0:16]:
             name = Constants.START_POSITION[wsq]
-            piece = (name, 'w', wsq)
+            piece = Utils.cls_from_symbol(name, 'w', wsq)
             self.white_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
@@ -40,15 +39,19 @@ class ChessGame(Layout):
 
         for bsq in squares[48:64]:
             name = Constants.START_POSITION[bsq]
-            piece = Piece(name, 'b', bsq)
+            piece = Utils.cls_from_symbol(name, 'b', bsq)
             self.black_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
             piece.set_square(bsq)
 
-        self.disable_pieces('b')
+        self.piece_translation('b', False)
 
     def window_resize(self, *event):
+        """
+        :param event: the resize event data
+        :return: resize the pieces and board to fit the screen
+        """
         if self.fullscreen:
             scale = 1 + 50 / 600
             self.board_image.pos = (300, 0)
@@ -66,77 +69,65 @@ class ChessGame(Layout):
         self.fullscreen = not self.fullscreen
         print("size changed")
 
-    def disable_pieces(self, color: str):
-        pieces = self.get_all_pieces_color(color)
-        for p in pieces:
-            p.do_translation = False
+    def piece_translation(self, color: str, translate: bool):
+        """
 
-    def enable_pieces(self, color: str):
+        :param color:
+        :param translate:
+        :return:
+        """
         pieces = self.get_all_pieces_color(color)
         for p in pieces:
-            p.do_translation = True
+            p.do_translation = translate
 
     def get_all_pieces_color(self, color: str) -> list:
+        """
+        :param color: the color of the pieces wanted
+        :return: all the pieces of a certain color
+        """
         return self.white_pieces if color == 'w' else self.black_pieces
 
-    def graphics(self):
-        pass
-
-    @staticmethod
-    def get_all_moves(board: Board, pieces: list) -> list:
+    def get_all_moves(self, board: Board, pieces: list) -> list:
+        """
+        :param board: the current board position
+        :param pieces: a list of the pieces for which to get the moves
+        :return: all the possible moves of these pieces
+        """
         moves = []
         for piece in pieces:
-            name = piece.piece_name
-            upper_name = name.upper()
-            color = piece.piece_color
-            possible_moves = []
-            if upper_name == 'P':
-                possible_moves = Logic.pawn(board, piece.square, color)
-            if upper_name == 'N':
-                possible_moves = Logic.knight(board, piece.square, color)
-            if upper_name == 'B':
-                possible_moves = Logic.bishop(board, piece.square, color)
-            if upper_name == 'R':
-                possible_moves = Logic.rook(board, piece.square, color)
-            if upper_name == 'Q':
-                possible_moves = Logic.queen(board, piece.square, color)
-            if upper_name == 'K':
-                possible_moves = Logic.king(board, piece.square, color)
-            moves += possible_moves
-        print(moves)
+            moves += piece.moves(board, piece.square)
         return moves
 
-    @staticmethod
-    def check(board: Board, sq: str, pieces: list) -> bool:
-        print(sq)
-        return sq in Logic.get_all_moves(board, pieces)
+    def check(self, board: Board, sq: str, pieces: list) -> bool:
+        """
+        :param board: the current board position
+        :param sq:
+        :param pieces: a list of the pieces for which to get the moves
+        :return: whether the square is under attack (the king is in check)
+        """
+        return sq in self.get_all_moves(board, pieces)
 
     @staticmethod
     def checkmate():
         pass
 
-    def legal_move(self, piece: Piece, sq: str) -> bool:
-        name = piece.piece_name
-        upper_name = name.upper()
-        color = piece.piece_color
-        possible_moves = []
-        if upper_name == 'P':
-            possible_moves = Logic.pawn(self.board, piece.square, color)
-        if upper_name == 'N':
-            possible_moves = Logic.knight(self.board, piece.square, color)
-        if upper_name == 'B':
-            possible_moves = Logic.bishop(self.board, piece.square, color)
-        if upper_name == 'R':
-            possible_moves = Logic.rook(self.board, piece.square, color)
-        if upper_name == 'Q':
-            possible_moves = Logic.queen(self.board, piece.square, color)
-        if upper_name == 'K':
-            possible_moves = Logic.king(self.board, piece.square, color)
-
+    def legal_move(self, piece: object, sq: str) -> bool:
+        """
+        :param piece: the piece trying to move
+        :param sq: the square the piece wants to move to
+        :return: true if the move is legal otherwise false
+        """
+        possible_moves = piece.moves(self.board, piece.square)
+        print(possible_moves)
         if not possible_moves:  # if possible moves is empty
             return False
 
         return sq in possible_moves
 
     def update_game(self, piece: Piece, sq: str):
+        """
+        :param piece: the piece played
+        :param sq: the square to move to
+        :return: updates the board and notation
+        """
         self.board.update_game(piece, sq)

@@ -5,6 +5,12 @@ import Utils
 from Constants import START_POSITION
 from Constants import XY_FIRST_SQUARE
 from Constants import DELTA_SQUARE
+from Pawn import Pawn
+from Knight import Knight
+from Bishop import Bishop
+from Rook import Rook
+from Queen import Queen
+from King import King
 
 import numpy as np
 
@@ -165,6 +171,22 @@ def split(moves: np.array, sq: str) -> (np.array, np.array):
     if idx == 0:
         return moves, None
     return moves[0: idx + 1], moves[idx:]
+
+
+def cls_from_symbol(symbol: str, color: str, sq: str) -> object:
+    upper_name = symbol.upper()
+    if upper_name == 'P':
+        return Pawn(symbol, color, sq)
+    if upper_name == 'N':
+        return Knight(symbol, color, sq)
+    if upper_name == 'B':
+        return Bishop(symbol, color, sq)
+    if upper_name == 'R':
+        return Rook(symbol, color, sq)
+    if upper_name == 'Q':
+        return Queen(symbol, color, sq)
+    if upper_name == 'K':
+        return King(symbol, color, sq)
 
 # b = Utils.split(np.array(['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8']), 'e5')
 # print(b)

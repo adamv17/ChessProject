@@ -18,6 +18,11 @@ class Board:
         self.notation = []
 
     def update_game(self, piece, square: str) -> str:
+        """
+        :param piece: the piece played
+        :param square: the square to move to
+        :return: updates the board and notation
+        """
         captured_piece, captured, tmp = self.update_position(piece, square)
         piece.update_square(square)
         notation_move: str = Utils.board_to_notation(
@@ -30,6 +35,11 @@ class Board:
         return captured_piece
 
     def update_position(self, piece, square: str):
+        """
+        :param piece: the piece played
+        :param square: the square to move to
+        :return: updates the board position
+        """
         captured_piece: str = self.position[square]
         print(captured_piece)
         captured: bool = captured_piece != "-"
@@ -39,6 +49,10 @@ class Board:
         return captured_piece, captured, tmp
 
     def update_notation(self, move: str):
+        """
+        :param move: the move played
+        :return: updates the notation
+        """
         self.notation.append(move)
         print(self.notation)
 
@@ -57,8 +71,9 @@ class Board:
             pass
 
     def is_square_empty(self, square: str) -> bool:
+        """
+        :param square: the square to check
+        :return: true if the square is empty otherwise false
+        """
         return self.position[square] == "-"
-
-    def position_to_graphics(self):
-        pass
 

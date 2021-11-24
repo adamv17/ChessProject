@@ -4,7 +4,9 @@ from kivy.uix.scatter import Scatter
 from kivy.uix.image import Image
 import Utils
 from Logic import Logic
+from Board import Board
 
+import numpy as np
 import Constants
 
 
@@ -24,9 +26,16 @@ class Piece(Scatter):
         self.moved = False
 
     def update_square(self, square: str):
+        """
+        :param square: the square of the piece
+        :return: updates the square
+        """
         self.square = square
 
     def get_close_square(self) -> str:
+        """
+        :return: the closest square to the piece coordinate position
+        """
         for sq in Constants.START_POSITION.keys():
             if self.is_on_square(self.parent.coord[sq][0], self.parent.coord[sq][1]):
                 return sq
@@ -34,15 +43,28 @@ class Piece(Scatter):
         return "-"
 
     def is_on_square(self, x: int, y: int) -> bool:
+        """
+        :param x: the x coordinate
+        :param y: the y coordinate
+        :return: whether the piece is on the coordinates
+        """
         return self.collide_point(x, y)
 
     def set_square(self, square: str):
+        """
+        :param square: the square to move to
+        :return: updates the graphics and properties of the piece
+        """
         coordinate = self.parent.coord[square]
         self.set_center_x(coordinate[0])
         self.set_center_y(coordinate[1])
         self.square = square
 
     def move_to_square(self, sq: str) -> bool:
+        """
+        :param sq: the square to move to
+        :return: updates the piece in the game otherwise keeps it in the same place
+        """
         if sq != "-":
             self.set_square(sq)
             return True
@@ -50,11 +72,18 @@ class Piece(Scatter):
         return False
 
     def capture(self, sq: str):
+        """
+        :param sq: the square of the piece to capture
+        :return: removes the piece
+        """
         for p in self.parent.pieces:
             if p.square == sq and self.piece_color != p.piece_color:
                 self.parent.remove_widget(p)
 
     def move(self) -> bool:
+        """
+        :return: moves the piece if it is legal then returns true otherwise false
+        """
         sq: str = self.get_close_square()
         if self.parent.legal_move(self, sq) and sq != self.square:
             board = copy.deepcopy(self.parent.board)
@@ -62,7 +91,7 @@ class Piece(Scatter):
             d = Utils.invert_dict(board.position)
             print(d)
             print(Utils.get_piece_name("K", self.piece_color))
-            if not Logic.check(
+            if not self.parent.check(
                     board,
                     d[Utils.get_piece_name("K", self.piece_color)],
                     self.parent.get_all_pieces_color(Utils.opposite_color(self.piece_color))):
@@ -76,33 +105,64 @@ class Piece(Scatter):
         return False
 
     def on_touch_down(self, touch):
+        """
+        :param touch: the piece touched
+        :return: if the piece can move now allows the grab
+        """
         if self.do_translation:
             return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
+        """
+        :param touch: the piece moved
+        :return: continues to move the piece and says that it has moved
+        """
         self.moved = True
         return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
+        """
+        :param touch: the piece touched
+        :return: moves the piece to the closest square otherwise returns it
+        """
         if self.collide_point(*touch.pos) and self.moved:
             played = self.move()
             if played:
-                self.parent.disable_pieces(self.piece_color)
-                self.parent.enable_pieces(Utils.opposite_color(self.piece_color))
+                self.parent.piece_translation(self.piece_color, False)
+                self.parent.piece_translation(Utils.opposite_color(self.piece_color), True)
         self.moved = False
         return super().on_touch_up(touch)
 
     def add_possible_moves(self, board: Board, sq: str, possible_moves: list, rays: tuple):
+        """
+        :param board: the current board
+        :param sq: the current square
+        :param possible_moves: the current possible moves
+        :param rays: rays of moves
+        :return: adds to the possible moves the rays
+        """
         possible_moves += self.ray_filtering(board, rays[0], sq)
         if rays[1] is not None:
             possible_moves += self.ray_filtering(board, rays[1], sq)
 
     def ray_filtering(self, board: Board, ray: np.array, sq: str):
+        """
+        :param board: the current board
+        :param ray: a ray of possible moves
+        :param sq: the current square
+        :return: the filtered ray
+        """
         ray: np.array = Utils.flip_ray(ray, sq)
         ray: list = Utils.delete_sq(list(ray), sq)
         return self.filter_possible_moves(board, ray, True)
 
     def filter_possible_moves(self, board: Board, moves: list, seq: bool) -> list:
+        """
+        :param board: the current board
+        :param moves: the possible moves
+        :param seq: whether there is a sequence in the moves
+        :return: the filtered possible moves
+        """
         filtered = []
         if not moves:
             return filtered
