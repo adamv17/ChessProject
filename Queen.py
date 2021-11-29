@@ -8,7 +8,7 @@ class Queen(Piece):
     def __init__(self, piece_name, color, square):
         super().__init__(piece_name, color, square)
 
-    def moves(self, board: Board, sq: str):
+    def moves(self, board: Board, sq: str) -> list:
         """
         :param board: the current board position
         :param sq: the current square of the piece

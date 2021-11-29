@@ -1,7 +1,6 @@
 from kivy.uix.scatter import Scatter
 from kivy.uix.image import Image
 import Utils
-from Logic import Logic
 from Board import Board
 
 import numpy as np
@@ -10,9 +9,9 @@ import copy
 
 
 class Piece(Scatter):
-    piece_name: str
-    color: str
-    square: str
+    piece_name: str  # the name of the piece
+    color: str  # the color of the piece
+    square: str  # the current square of the piece
 
     def __init__(self, piece_name, color, square):
         super().__init__(do_rotation=False, do_scale=False)
@@ -94,6 +93,7 @@ class Piece(Scatter):
                 if captured != "-":
                     self.capture(sq)
                 played = self.move_to_square(sq)
+                self.parent.end(self.color)
                 return played
         self.set_square(self.square)
         return False
@@ -103,7 +103,7 @@ class Piece(Scatter):
         :param touch: the piece touched
         :return: if the piece can move now allows the grab
         """
-        if self.do_translation:
+        if self.do_translation[0] and not self.parent.game_ended:
             return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):

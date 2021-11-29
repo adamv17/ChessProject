@@ -41,7 +41,6 @@ class Board:
         :return: updates the board position
         """
         captured_piece: str = self.position[square]
-        print(captured_piece)
         captured: bool = captured_piece != "-"
         tmp = piece.square
         self.position[piece.square] = "-"
