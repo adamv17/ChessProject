@@ -5,8 +5,8 @@ from Rook import Rook
 
 
 class Queen(Piece):
-    def __init__(self, piece_name, piece_color, square):
-        super().__init__(piece_name, piece_color, square)
+    def __init__(self, piece_name, color, square):
+        super().__init__(piece_name, color, square)
 
     def moves(self, board: Board, sq: str):
         """

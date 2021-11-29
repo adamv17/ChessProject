@@ -7,8 +7,9 @@ import numpy as np
 import os.path
 from Board import Board
 from Logic import Logic
-import chess
+# import chess
 import Constants
+
 
 
 class ChessGame(Layout):
@@ -111,7 +112,7 @@ class ChessGame(Layout):
     def checkmate():
         pass
 
-    def legal_move(self, piece: object, sq: str) -> bool:
+    def legal_move(self, piece: object, sq: str) -> (bool, bool):
         """
         :param piece: the piece trying to move
         :param sq: the square the piece wants to move to
@@ -119,9 +120,6 @@ class ChessGame(Layout):
         """
         possible_moves = piece.moves(self.board, piece.square)
         print(possible_moves)
-        if not possible_moves:  # if possible moves is empty
-            return False
-
         return sq in possible_moves
 
     def update_game(self, piece: Piece, sq: str):

@@ -1,5 +1,3 @@
-import copy
-
 from kivy.uix.scatter import Scatter
 from kivy.uix.image import Image
 import Utils
@@ -8,17 +6,18 @@ from Board import Board
 
 import numpy as np
 import Constants
+import copy
 
 
 class Piece(Scatter):
     piece_name: str
-    piece_color: str
+    color: str
     square: str
 
-    def __init__(self, piece_name, piece_color, square):
+    def __init__(self, piece_name, color, square):
         super().__init__(do_rotation=False, do_scale=False)
         self.piece_name = piece_name
-        self.piece_color = piece_color
+        self.color = color
         self.square = square
         image = Image(source=Constants.PIECES[piece_name])
         image.size = (80, 80)
@@ -77,7 +76,7 @@ class Piece(Scatter):
         :return: removes the piece
         """
         for p in self.parent.pieces:
-            if p.square == sq and self.piece_color != p.piece_color:
+            if p.square == sq and self.color != p.color:
                 self.parent.remove_widget(p)
 
     def move(self) -> bool:
@@ -85,17 +84,12 @@ class Piece(Scatter):
         :return: moves the piece if it is legal then returns true otherwise false
         """
         sq: str = self.get_close_square()
-        if self.parent.legal_move(self, sq) and sq != self.square:
+        if self.parent.legal_move(self, sq):
             board = copy.deepcopy(self.parent.board)
             board.update_position(self, sq)
             d = Utils.invert_dict(board.position)
-            print(d)
-            print(Utils.get_piece_name("K", self.piece_color))
-            if not self.parent.check(
-                    board,
-                    d[Utils.get_piece_name("K", self.piece_color)],
-                    self.parent.get_all_pieces_color(Utils.opposite_color(self.piece_color))):
-                print("no check")
+            if not self.parent.check(board, d[Utils.get_piece_name("K", self.color)],
+                                     self.parent.get_all_pieces_color(Utils.opposite_color(self.color))):
                 captured = self.parent.board.update_game(self, sq)
                 if captured != "-":
                     self.capture(sq)
@@ -128,8 +122,8 @@ class Piece(Scatter):
         if self.collide_point(*touch.pos) and self.moved:
             played = self.move()
             if played:
-                self.parent.piece_translation(self.piece_color, False)
-                self.parent.piece_translation(Utils.opposite_color(self.piece_color), True)
+                self.parent.piece_translation(self.color, False)
+                self.parent.piece_translation(Utils.opposite_color(self.color), True)
         self.moved = False
         return super().on_touch_up(touch)
 
@@ -164,18 +158,13 @@ class Piece(Scatter):
         :return: the filtered possible moves
         """
         filtered = []
-        if not moves:
-            return filtered
         for move in moves:
             if board.is_square_empty(move):
                 filtered.append(move)
-            elif Utils.get_color_piece(board.position[move]) != self.piece_color:
+            elif Utils.get_color_piece(board.position[move]) != self.color:
                 filtered.append(move)
                 if seq:
                     break
             elif seq:
                 break
         return filtered
-
-
-
