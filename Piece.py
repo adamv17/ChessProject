@@ -85,16 +85,21 @@ class Piece(Scatter):
         sq: str = self.get_close_square()
         if self.parent.legal_move(self, sq):
             board = copy.deepcopy(self.parent.board)
-            board.update_position(self, sq)
+            cp, cs, tmp = board.update_position(self, sq)
+            pieces: list = self.parent.get_all_pieces_color(Utils.opposite_color(self.color))
+            removed = None
+            if cs:
+                removed = self.parent.remove_piece(pieces, sq)
             d = Utils.invert_dict(board.position)
-            if not self.parent.check(board, d[Utils.get_piece_name("K", self.color)],
-                                     self.parent.get_all_pieces_color(Utils.opposite_color(self.color))):
+            if not self.parent.check(board, d[Utils.get_piece_name("K", self.color)], pieces):
                 captured = self.parent.board.update_game(self, sq)
                 if captured != "-":
                     self.capture(sq)
                 played = self.move_to_square(sq)
                 self.parent.end(self.color)
                 return played
+            elif removed is not None:
+                pieces.append(removed)
         self.set_square(self.square)
         return False
 

@@ -57,3 +57,6 @@ class King(Piece):
             if self.can_move(board, m):
                 legal.append(m)
         return legal
+
+    def castling(self):
+        pass

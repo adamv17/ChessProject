@@ -25,6 +25,7 @@ class Pawn(Piece):
             possible_sq.append([idx[0] + 2, idx[1]])
         elif idx[0] == 6 and not is_white:
             possible_sq.append([idx[0] - 2, idx[1]])
+        captured = []
         possible_moves = [board.sq_board[square[0]][square[1]] for square in possible_sq if
                           Utils.borders(square[0]) and Utils.borders(square[1])]
         sq_en = [None, None]

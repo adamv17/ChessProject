@@ -64,10 +64,10 @@ class Board:
         for i, move in enumerate(notation):
             name, squares, special, castle = Utils.notation_to_board(move, Utils.get_color(i + 1))
             # TODO: continue writing this method
-
-    def play_move(self, name: str, squares: list[str], special: list[bool], castle: int):
-        if castle == 2:
-            pass
+    #
+    # def play_move(self, name: str, squares: list[str], special: list[bool], castle: int):
+    #     if castle == 2:
+    #         pass
 
     def is_square_empty(self, square: str) -> bool:
         """

@@ -1,10 +1,7 @@
 """
 Utils class, contains all utility functions that are modular and unrelated to the User or the Engine.
 """
-import Utils
 from Constants import START_POSITION
-from Constants import XY_FIRST_SQUARE
-from Constants import DELTA_SQUARE
 from Pawn import Pawn
 from Knight import Knight
 from Bishop import Bishop

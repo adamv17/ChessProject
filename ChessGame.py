@@ -112,7 +112,7 @@ class ChessGame(Layout):
         """
         return sq in self.get_all_moves(board, pieces)
 
-    def legal_move(self, piece: object, sq: str) -> bool:
+    def legal_move(self, piece: Piece, sq: str) -> bool:
         """
         :param piece: the piece trying to move
         :param sq: the square the piece wants to move to
@@ -143,3 +143,9 @@ class ChessGame(Layout):
                                 size_hint=[None, None],
                                 size=(400, 400), auto_dismiss=True)
             popupWindow.open()
+
+    def remove_piece(self, pieces: list, sq: str) -> Piece:
+        for i, p in enumerate(pieces):
+            if p.square == sq:
+                cp = pieces.pop(i)
+                return cp
