@@ -1,20 +1,14 @@
-from Piece import Piece
-from Board import Board
-import numpy as np
 import Utils
+from Board import Board
+from Piece import Piece
 
 
 class Pawn(Piece):
-    def __init__(self, piece_name, color, square):
-        super().__init__(piece_name, color, square)
+    def __init__(self, piece_name, piece_color, square):
+        super().__init__(piece_name, piece_color, square)
         self.promotion = False
 
     def moves(self, board: Board, sq: str) -> list:
-        """
-        :param board: the current board position
-        :param sq: the current square of the piece
-        :return: the possible moves of the piece
-        """
         idx: tuple = Utils.get_index(sq)
         row: int = idx[0] - 1
         is_white = self.color == 'w'
@@ -25,7 +19,6 @@ class Pawn(Piece):
             possible_sq.append([idx[0] + 2, idx[1]])
         elif idx[0] == 6 and not is_white:
             possible_sq.append([idx[0] - 2, idx[1]])
-        captured = []
         possible_moves = [board.sq_board[square[0]][square[1]] for square in possible_sq if
                           Utils.borders(square[0]) and Utils.borders(square[1])]
         sq_en = [None, None]
@@ -48,12 +41,6 @@ class Pawn(Piece):
 
         return possible_moves
 
-    def attack_moves(self):
-        pass
-
-    def promotion(self):
-        pass
-
     def en_passant(self, board: Board, sq: str):
         if not board.notation:
             return False
@@ -63,3 +50,4 @@ class Pawn(Piece):
         if self.color == 'w':
             return last_move[0] + str(int(last_move[1]) + 1) == sq and board.is_square_empty(sq)
         return last_move[0] + str(int(last_move[1]) - 1) == sq and board.is_square_empty(sq)
+
