@@ -18,10 +18,14 @@ class Piece(Scatter):
         self.piece_name = piece_name
         self.color = color
         self.square = square
-        image = Image(source=Constants.PIECES[piece_name])
-        image.size = (80, 80)
-        self.add_widget(image)
+        try:
+            image = Image(source=Constants.PIECES[piece_name])
+            image.size = (80, 80)
+            self.add_widget(image)
+        except KeyError:
+            print(f"{piece_name} initialized: {self}")
         self.moved = False
+        self.has_been_played = False
 
     def update_square(self, square: str):
         """
@@ -85,21 +89,22 @@ class Piece(Scatter):
         sq: str = self.get_close_square()
         if self.parent.legal_move(self, sq):
             board = copy.deepcopy(self.parent.board)
-            cp, cs, tmp = board.update_position(self, sq)
-            pieces: list = self.parent.get_all_pieces_color(Utils.opposite_color(self.color))
-            removed = None
-            if cs:
-                removed = self.parent.remove_piece(pieces, sq)
+            board.update_position(self, sq)
             d = Utils.invert_dict(board.position)
-            if not self.parent.check(board, d[Utils.get_piece_name("K", self.color)], pieces):
+            if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
+                                                  Utils.opposite_color(self.color)):
                 captured = self.parent.board.update_game(self, sq)
                 if captured != "-":
                     self.capture(sq)
-                played = self.move_to_square(sq)
-                self.parent.end(self.color)
+
+                played = False
+                if self.piece_name.upper() == 'P' and (
+                        Utils.get_index(self.square)[0] == 0 or Utils.get_index(self.square)[0] == 7):
+                    self.parent.promotion(self)
+                else:
+                    played = self.move_to_square(sq)
+                    self.parent.end(self.color)
                 return played
-            elif removed is not None:
-                pieces.append(removed)
         self.set_square(self.square)
         return False
 
@@ -124,9 +129,14 @@ class Piece(Scatter):
         :param touch: the piece touched
         :return: moves the piece to the closest square otherwise returns it
         """
+        if self is None or self.parent is None:
+            return None
         if self.collide_point(*touch.pos) and self.moved:
             played = self.move()
+            if self.parent is None:
+                return None
             if played:
+                self.has_been_played = True
                 self.parent.piece_translation(self.color, False)
                 self.parent.piece_translation(Utils.opposite_color(self.color), True)
         self.moved = False

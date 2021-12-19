@@ -29,8 +29,7 @@ class King(Piece):
         :param board:
         :return:
         """
-        in_check: bool = self.parent.check(board, self.square,
-                                           self.parent.get_all_pieces_color(Utils.opposite_color(self.color)))
+        in_check: bool = self.parent.is_square_attacked(board, self.square, Utils.opposite_color(self.color))
         no_moves: bool = len(self.moves(board, self.square)) == 0
         return in_check and no_moves
 
@@ -42,8 +41,7 @@ class King(Piece):
         """
         board_copy = copy.deepcopy(board)
         board_copy.update_position(self, move)
-        in_check: bool = self.parent.check(board_copy, move,
-                                           self.parent.get_all_pieces_color(Utils.opposite_color(self.color)))
+        in_check: bool = self.parent.is_square_attacked(board_copy, move, Utils.opposite_color(self.color))
         return not in_check
 
     def filter_king_moves(self, board: Board, moves: list) -> list:
@@ -58,5 +56,20 @@ class King(Piece):
                 legal.append(m)
         return legal
 
-    def castling(self):
+    def can_castle(self, board):
+        if not self.has_been_played:
+            pass
+
+    def short(self, board):
+        squares = ['f8', 'g8']
+        if self.color == 'w':
+            squares = ['f1', 'g1']
+        # rook = self.parent.
+        return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1])
+
+    def long(self):
         pass
+
+    def castle(self):
+        pass
+

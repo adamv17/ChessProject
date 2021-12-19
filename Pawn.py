@@ -6,7 +6,6 @@ from Piece import Piece
 class Pawn(Piece):
     def __init__(self, piece_name, piece_color, square):
         super().__init__(piece_name, piece_color, square)
-        self.promotion = False
 
     def moves(self, board: Board, sq: str) -> list:
         idx: tuple = Utils.get_index(sq)
@@ -50,4 +49,5 @@ class Pawn(Piece):
         if self.color == 'w':
             return last_move[0] + str(int(last_move[1]) + 1) == sq and board.is_square_empty(sq)
         return last_move[0] + str(int(last_move[1]) - 1) == sq and board.is_square_empty(sq)
+
 
