@@ -26,13 +26,11 @@ class GameEvalInput(nn.Module):
     def __init__(self):
         super().__init__()
         self.game = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=400, kernel_size=10),
+            nn.Linear(in_features=64, out_features=512),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=5, stride=2),
-            nn.Conv1d(in_channels=400, out_channels=500, kernel_size=10),
+            nn.Linear(in_features=512, out_features=128),
             nn.ReLU(),
-            nn.Linear(in_features=500, out_features=50),
-            nn.ReLU()
+            nn.Linear(in_features=128, out_features=128),
         )
         self.eval = nn.Sequential(
             nn.Conv1d(in_channels=1, out_channels=200, kernel_size=20),
@@ -44,7 +42,7 @@ class GameEvalInput(nn.Module):
             nn.ReLU(),
         )
         self.fc_combine = nn.Sequential(
-            nn.Linear(in_features=50, out_features=30),
+            nn.Linear(in_features=178, out_features=30),
             nn.ReLU(),
             nn.Linear(in_features=30, out_features=2)
         )
@@ -83,3 +81,6 @@ def visualize():
     writer = SummaryWriter('runs')
     writer.add_graph(model, x)
     writer.close()
+
+
+visualize()
