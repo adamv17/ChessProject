@@ -39,10 +39,10 @@ def train(model, Xin1, Xin2, Y, learning_rate=1e-3, epochs=2000, batch_size=128)
         for i in range(0, Xin1.size()[0], batch_size):
             indices = permutation[i:i + batch_size]
             batch_x, batch_x2, batch_y = Xin1[indices], Xin2[indices], Y[indices]
-            y_pred = model(batch_x.cuda(), batch_x2.cuda())
-            loss = loss_func(y_pred, batch_y.cuda())
+            y_hat = model(batch_x.cuda(), batch_x2.cuda())
+            loss = loss_func(y_hat, batch_y.cuda())
             if epoch % 100 == 0:
-                print(epoch, loss.item())
+                print(f'epoch = {epoch}, loss = {loss.item()}')
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -83,7 +83,12 @@ def test(model, weights_file, X, Y):
     )
 
 
-x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt'))
-y_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/Y.pt'))
-x2_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X2.pt'))
-# train()
+x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt')).float()
+y_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/Y.pt')).float()
+x2_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X2.pt')).float()
+
+train_x, train_x2, train_y, test_x, test_x2, test_y = split_train_test(x_data, x2_data, y_data)
+
+ai_model = Model.GameEvalInput()
+
+train(ai_model, train_x, train_x2, train_y)

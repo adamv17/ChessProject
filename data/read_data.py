@@ -27,29 +27,10 @@ def get_eval():
 
 
 def get_elo():
-    start_pos = [114, 110, 98, 113, 107, 98, 110, 114,
-                 112, 112, 112, 112, 112, 112, 112, 112,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 0, 0, 0, 0, 0, 0, 0, 0,
-                 80, 80, 80, 80, 80, 80, 80, 80,
-                 82, 78, 66, 81, 75, 66, 78, 82]
     games = open('data.pgn')
     y_np = np.empty((18000, 2))
-    x2_np = np.empty((18000, 50, 64))
     for i in range(18000):
         game = chess.pgn.read_game(games)
-        board = game.board()
-        for k in range(50):
-            b = fen_to_board(board.fen())
-            x2_np[i, k, :] = b
-            try:
-                game.next()
-                board = game.board()
-            except TypeError:
-                board = start_pos
-
         white_elo = game.headers.get('WhiteElo')
         black_elo = game.headers.get('BlackElo')
         y_np[i] = np.array([white_elo, black_elo])
@@ -58,9 +39,30 @@ def get_elo():
     print(y_np)
     y = torch.from_numpy(y_np)
     print(y)
+
+
+    torch.save(y, 'Y.pt')
+
+
+def get_board_positions():
+    x2_np = np.empty((18000, 50, 64))
+    games = open('data.pgn')
+    for i in range(18000):
+        game = chess.pgn.read_game(games)
+        board = game.board()
+        start_pos = board
+        for k in range(50):
+            b = fen_to_board(board.fen())
+            x2_np[i, k, :] = b
+            try:
+                game = game.next()
+                board = game.board()
+            except AttributeError:
+                board = start_pos
+        if i % 1000 == 0:
+            print(f'{i}')
     print(x2_np)
     x2 = torch.from_numpy(x2_np)
-    torch.save(y, 'Y.pt')
     torch.save(x2, 'X2.pt')
 
 
@@ -76,7 +78,7 @@ def fen_to_board(fen):
             elif c > 'Z' or 'A' < c < 'Z':
                 brow.append(ord(c))
         board.append(brow)
-    return np.asarray(board).reshape(64,)
+    return np.asarray(board).reshape(64, )
 
 
 def get_lichess():
@@ -87,5 +89,4 @@ def get_lichess():
     print(first_game)
     # lines = (line.decode().rstrip('\r\n') for line in lichess_data)
 
-
-get_elo()
+get_board_positions()
