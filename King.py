@@ -22,6 +22,7 @@ class King(Piece):
             sq_col = idx[1] + d[1]
             if Utils.borders(sq_row) and Utils.borders(sq_col):
                 possible_moves.append(board.sq_board[sq_row][sq_col])
+        self.castle(board, possible_moves)
         return self.filter_king_moves(board, self.filter_possible_moves(board, possible_moves, False))
 
     def checkmate(self, board: Board) -> bool:
@@ -56,20 +57,27 @@ class King(Piece):
                 legal.append(m)
         return legal
 
-    def can_castle(self, board):
-        if not self.has_been_played:
-            pass
-
     def short(self, board):
         squares = ['f8', 'g8']
+        rook = self.parent.black_rooks[0]
         if self.color == 'w':
             squares = ['f1', 'g1']
-        # rook = self.parent.
-        return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1])
+            rook = self.parent.white_rooks[0]
+        return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1]) and not rook.has_been_played
 
-    def long(self):
-        pass
+    def long(self, board):
+        squares = ['d8', 'c8', 'b8']
+        rook = self.parent.black_rooks[1]
+        if self.color == 'w':
+            squares = ['d1', 'c1', 'b1']
+            rook = self.parent.white_rooks[1]
+        return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1]) and board.is_square_empty(
+            squares[2]) and not rook.has_been_played
 
-    def castle(self):
-        pass
-
+    def castle(self, board, possible_moves):
+        is_white = self.color == 'w'
+        if not self.has_been_played:
+            if self.short(board):
+                possible_moves.append('g1' if is_white else 'g8')
+            if self.long(board):
+                possible_moves.append('c1' if is_white else 'c8')

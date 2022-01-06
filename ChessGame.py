@@ -34,12 +34,13 @@ class ChessGame(Layout):
         self.board_image.size = (600, 600)
         self.add_widget(self.board_image)
         self.fullscreen = False
-        Window.bind(on_resize=self.window_resize)
+        # Window.bind(on_resize=self.window_resize)
         self.coord = Utils.get_coord(Constants.DELTA_SQUARE, Constants.XY_FIRST_SQUARE)
 
         self.pieces = []
         self.white_pieces = []
         self.black_pieces = []
+        self.white_rooks = []
         squares = list(Constants.START_POSITION.keys())
         # initialize white pieces
         for wsq in squares[0:16]:
@@ -47,17 +48,22 @@ class ChessGame(Layout):
             piece = Utils.cls_from_symbol(name, 'w', wsq)
             if name == 'K':
                 self.white_king = piece
+            if name == 'R':
+                self.white_rooks.append(piece)
             self.white_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
             piece.set_square(wsq)
 
         # initialize black pieces
+        self.black_rooks = []
         for bsq in squares[48:64]:
             name = Constants.START_POSITION[bsq]
             piece = Utils.cls_from_symbol(name, 'b', bsq)
             if name == 'k':
                 self.black_king = piece
+            if name == 'r':
+                self.black_rooks.append(piece)
             self.black_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)

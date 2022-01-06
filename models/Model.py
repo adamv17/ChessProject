@@ -25,15 +25,7 @@ def get_model_cnn():
 class GameEvalInput(nn.Module):
     def __init__(self):
         super().__init__()
-        self.game = nn.Sequential(
-            nn.Linear(in_features=64, out_features=512),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_features=512, out_features=128),
-            nn.ReLU(inplace=True),
-            nn.Linear(in_features=128, out_features=128),
-            nn.ReLU(inplace=True)
-        )
-        self.eval = nn.Sequential(
+        self.evl = nn.Sequential(
             nn.Conv1d(in_channels=1, out_channels=200, kernel_size=20),
             nn.ReLU(inplace=True),
             nn.Flatten(),
@@ -42,16 +34,22 @@ class GameEvalInput(nn.Module):
             nn.Linear(in_features=50, out_features=50),
             nn.ReLU(inplace=True),
         )
-        self.fc_combine = nn.Sequential(
-            nn.Linear(in_features=178, out_features=30),
+        self.game = nn.Sequential(
+            nn.Linear(in_features=64, out_features=512),
             nn.ReLU(inplace=True),
-            nn.Linear(in_features=30, out_features=2)
+            nn.Linear(in_features=512, out_features=128),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_features=128, out_features=128),
+            nn.ReLU(inplace=True)
+        )
+        self.fc_combine = nn.Sequential(
+            nn.Linear(in_features=6450, out_features=100),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_features=100, out_features=2)
         )
 
     def forward(self, input1, input2):
-        print(input1)
-        print(input2)
-        e = self.eval(input1)
+        e = self.evl(input1)
         g = self.game(input2)
         combined = torch.cat((g.view(g.size(0), -1),
                               e.view(e.size(0), -1)), dim=1)
