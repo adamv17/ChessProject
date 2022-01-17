@@ -15,6 +15,26 @@ from kivy.uix.label import Label
 
 # from ChessApp import ChessApp
 from Rook import Rook
+import chess
+from stockfish import Stockfish
+from kivy.clock import Clock
+from matplotlib import pyplot as plt
+from kivy.garden.graph import Graph, MeshLinePlot
+
+graph = Graph(
+    xlabel='Moves',
+    ylabel='Evals',
+    x_ticks_minor=1,
+    y_ticks_major=1,
+    y_grid_label=True,
+    x_grid_label=True,
+    padding=5,
+    xlog=False,
+    ylog=False,
+    x_grid=True,
+    y_grid=True,
+    ymin=-1,
+    ymax=1)
 
 
 class ChessGame(Layout):
@@ -72,6 +92,30 @@ class ChessGame(Layout):
         self.piece_translation('b', False)
         self.game_ended = False
         self.promoted_pawn = None
+        self.pgn_board = chess.Board()
+        self.fish = Stockfish(path="models/stockfish_14.1_win_x64_avx2.exe")
+        self.stockfish_evals = []
+        self.plot = MeshLinePlot(color=[1, 0, 0, 1])
+        self.add_widget(graph)
+
+    def get_pos_eval(self, fen: str):
+        self.fish.set_fen_position(fen)
+        return self.fish.get_evaluation()['value'] / 100
+
+    def schedule_eval(self):
+        Clock.schedule_once(self.eval_pos, 0)
+
+    def eval_pos(self, *args):
+        self.stockfish_evals.append(self.get_pos_eval(self.pgn_board.fen()))
+        print(self.stockfish_evals)
+        self.plot.points = [(x, y) for x, y in enumerate(self.stockfish_evals)]
+        graph.add_plot(self.plot)
+
+    def add_position(self):
+        move = self.pgn_board.push_san(self.board.notation[-1])
+        print(self.pgn_board)
+        if not self.pgn_board.is_checkmate():
+            self.schedule_eval()
 
     def window_resize(self, *event):
         """

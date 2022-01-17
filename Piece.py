@@ -139,6 +139,7 @@ class Piece(Scatter):
                 self.has_been_played = True
                 self.parent.piece_translation(self.color, False)
                 self.parent.piece_translation(Utils.opposite_color(self.color), True)
+                self.parent.add_position()
         self.moved = False
         return super().on_touch_up(touch)
 
