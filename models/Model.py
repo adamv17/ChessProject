@@ -3,7 +3,7 @@ import os
 import torch
 from torch import nn
 from torchviz import make_dot
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 
 import Constants
 
@@ -45,8 +45,9 @@ class GameEvalInput(nn.Module):
         self.fc_combine = nn.Sequential(
             nn.Linear(in_features=6450, out_features=100),
             nn.ReLU(inplace=True),
-            nn.Linear(in_features=100, out_features=2)
+            nn.Linear(in_features=100, out_features=2),
         )
+        # nn.Softmax()
 
     def forward(self, input1, input2):
         e = self.evl(input1)
@@ -70,18 +71,15 @@ def get_model_dense():
     return model
 
 
-def visualize():
-    model = get_model_cnn()
-    model.eval()
-    x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt')).float()
-    x = x_data[14401:18000].float()
-    x = x[:, None, :]
-    y = model(x)
-    make_dot(y.mean(), params=dict(list(model.named_parameters()))).render('learning_torchviz', format='png')
-    # default `log_dir` is "runs" - we'll be more specific here
-    writer = SummaryWriter('runs')
-    writer.add_graph(model, x)
-    writer.close()
-
-
-visualize()
+# def visualize():
+#     model = get_model_cnn()
+#     model.eval()
+#     x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt')).float()
+#     x = x_data[14401:18000].float()
+#     x = x[:, None, :]
+#     y = model(x)
+#     make_dot(y.mean(), params=dict(list(model.named_parameters()))).render('learning_torchviz', format='png')
+#     # default `log_dir` is "runs" - we'll be more specific here
+#     writer = SummaryWriter('runs')
+#     writer.add_graph(model, x)
+#     writer.close()

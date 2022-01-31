@@ -17,7 +17,7 @@ class Board:
         self.sq_board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
-    def update_game(self, piece, square: str) -> str:
+    def update_game(self, piece, square: str, castle: int) -> str:
         """
         :param piece: the piece played
         :param square: the square to move to
@@ -29,7 +29,7 @@ class Board:
             piece.piece_name.upper(),
             [square, tmp[0] if captured else None],
             [False, captured, False, False],
-            2, ''
+            castle, ''
         )
         self.update_notation(notation_move)
         return captured_piece

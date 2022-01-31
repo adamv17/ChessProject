@@ -82,7 +82,7 @@ class Piece(Scatter):
             if p.square == sq and self.color != p.color:
                 self.parent.remove_widget(p)
 
-    def move(self) -> bool:
+    def move(self) -> (bool, bool):
         """
         :return: moves the piece if it is legal then returns true otherwise false
         """
@@ -93,20 +93,23 @@ class Piece(Scatter):
             d = Utils.invert_dict(board.position)
             if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
                                                   Utils.opposite_color(self.color)):
-                captured = self.parent.board.update_game(self, sq)
+                castle = self.check_special(sq)
+                captured = self.parent.board.update_game(self, sq, castle)
                 if captured != "-":
                     self.capture(sq)
 
                 played = False
+                promotion = False
                 if self.piece_name.upper() == 'P' and (
                         Utils.get_index(self.square)[0] == 0 or Utils.get_index(self.square)[0] == 7):
                     self.parent.promotion(self)
+                    promotion = True
                 else:
                     played = self.move_to_square(sq)
                     self.parent.end(self.color)
-                return played
+                return played, promotion
         self.set_square(self.square)
-        return False
+        return False, False
 
     def on_touch_down(self, touch):
         """
@@ -132,14 +135,15 @@ class Piece(Scatter):
         if self is None or self.parent is None:
             return None
         if self.collide_point(*touch.pos) and self.moved:
-            played = self.move()
+            played, promotion = self.move()
             if self.parent is None:
                 return None
             if played:
                 self.has_been_played = True
                 self.parent.piece_translation(self.color, False)
                 self.parent.piece_translation(Utils.opposite_color(self.color), True)
-                self.parent.add_position()
+                if not promotion:
+                    self.parent.add_position()
         self.moved = False
         return super().on_touch_up(touch)
 
@@ -184,3 +188,18 @@ class Piece(Scatter):
             elif seq:
                 break
         return filtered
+
+    def check_special(self, sq):
+        x = 5
+        if self.piece_name.upper() == 'K' and self.square == self.start_sq:
+            if sq[0] == 'g':
+                self.rook_short.castle_rook()
+                return 0
+            elif sq[0] == 'c':
+                self.rook_long.castle_rook()
+                return 1
+            else:
+                return 2
+        return 2
+
+

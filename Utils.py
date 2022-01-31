@@ -185,5 +185,17 @@ def cls_from_symbol(symbol: str, color: str, sq: str) -> object:
     if upper_name == 'K':
         return King(symbol, color, sq)
 
-# b = Utils.split(np.array(['a1', 'b2', 'c3', 'd4', 'e5', 'f6', 'g7', 'h8']), 'e5')
-# print(b)
+
+def fen_to_board(fen):
+    board = []
+    for row in fen.split('/'):
+        brow = []
+        for c in row:
+            if c == ' ':
+                break
+            elif c in '12345678':
+                brow.extend([0] * int(c))
+            elif c > 'Z' or 'A' < c < 'Z':
+                brow.append(ord(c))
+        board.append(brow)
+    return np.asarray(board).reshape(64, )

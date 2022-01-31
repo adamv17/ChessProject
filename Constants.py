@@ -3,7 +3,7 @@ The Constants file contains all game constants that may be used in all game file
 """
 import os.path
 
-XY_FIRST_SQUARE = (145, 50)
+XY_FIRST_SQUARE = (45, 50)
 DELTA_SQUARE = 75.5
 
 XY_FIRST_SQUARE_FULL = (350, 55)

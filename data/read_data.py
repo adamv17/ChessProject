@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import chess.pgn
 import torch
@@ -40,7 +42,6 @@ def get_elo():
     y = torch.from_numpy(y_np)
     print(y)
 
-
     torch.save(y, 'Y.pt')
 
 
@@ -81,12 +82,10 @@ def fen_to_board(fen):
     return np.asarray(board).reshape(64, )
 
 
-def get_lichess():
-    with bz2.open('lichess_db_standard_rated_2021-08.pgn.bz2', 'rb') as lichess_data:
-        for line in lichess_data:
-            first_game = chess.pgn.read_game(''.join(line))
-            break
-    print(first_game)
-    # lines = (line.decode().rstrip('\r\n') for line in lichess_data)
-
-get_board_positions()
+def get_lichess(num_to_run: int):
+    positions = torch.empty((1_000_000, 50, 64))
+    games = open('lichess.pgn')
+    for i in range(num_to_run):
+        game = chess.pgn.read_game(games)
+        board = game.board()
+        eval = game.eval()

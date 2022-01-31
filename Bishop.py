@@ -19,12 +19,14 @@ class Bishop(Piece):
         k_main: int = idx[1] - idx[0]
         main_d: np.array = Bishop.get_k_diag(board.sq_board, k_main)
         possible_moves = []
-        self.add_possible_moves(board, sq, possible_moves, Utils.split(main_d, sq))
+        if len(main_d) != 0:
+            self.add_possible_moves(board, sq, possible_moves, Utils.split(main_d, sq))
 
         # secondary diagonal calculation
         k_sec: int = idx[0] + idx[1] - 7  # k for secondary diagonal
         sec_d: np.array = Bishop.get_k_diag(np.flipud(board.sq_board), k_sec)  # vertical flip
-        self.add_possible_moves(board, sq, possible_moves, Utils.split(sec_d, sq))
+        if len(sec_d) != 0:
+            self.add_possible_moves(board, sq, possible_moves, Utils.split(sec_d, sq))
 
         return possible_moves
 

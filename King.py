@@ -8,6 +8,9 @@ import Utils
 class King(Piece):
     def __init__(self, piece_name, color, square):
         super().__init__(piece_name, color, square)
+        self.start_sq = self.square
+        self.rook_short = None
+        self.rook_long = None
 
     def moves(self, board: Board, sq: str) -> list:
         """
@@ -59,20 +62,21 @@ class King(Piece):
 
     def short(self, board):
         squares = ['f8', 'g8']
-        rook = self.parent.black_rooks[0]
+        self.rook_short = self.parent.black_rooks[1]
         if self.color == 'w':
             squares = ['f1', 'g1']
-            rook = self.parent.white_rooks[0]
-        return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1]) and not rook.has_been_played
+            self.rook_short = self.parent.white_rooks[1]
+        return board.is_square_empty(squares[0]) and board.is_square_empty(
+            squares[1]) and not self.rook_short.has_been_played
 
     def long(self, board):
         squares = ['d8', 'c8', 'b8']
-        rook = self.parent.black_rooks[1]
+        self.rook_long = self.parent.black_rooks[0]
         if self.color == 'w':
             squares = ['d1', 'c1', 'b1']
-            rook = self.parent.white_rooks[1]
+            self.rook_long = self.parent.white_rooks[0]
         return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1]) and board.is_square_empty(
-            squares[2]) and not rook.has_been_played
+            squares[2]) and not self.rook_long.has_been_played
 
     def castle(self, board, possible_moves):
         is_white = self.color == 'w'

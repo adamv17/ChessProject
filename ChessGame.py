@@ -20,12 +20,14 @@ from stockfish import Stockfish
 from kivy.clock import Clock
 from matplotlib import pyplot as plt
 from kivy.garden.graph import Graph, MeshLinePlot
+import torch
+from models.Model import GameEvalInput
 
-graph = Graph(
+graph_eval = Graph(
     xlabel='Moves',
     ylabel='Evals',
-    x_ticks_minor=1,
-    y_ticks_major=1,
+    x_ticks_major=1,
+    y_ticks_major=100,
     y_grid_label=True,
     x_grid_label=True,
     padding=5,
@@ -33,9 +35,11 @@ graph = Graph(
     ylog=False,
     x_grid=True,
     y_grid=True,
-    ymin=-1,
-    ymax=1)
-
+    ymin=-300,
+    ymax=300,
+    pos=(600, 400),
+    size=(200, 200)
+)
 
 class ChessGame(Layout):
     def __init__(self, **kwargs):
@@ -50,7 +54,7 @@ class ChessGame(Layout):
         self.q.button_name = 'Q'
         self.board = Board()
         self.board_image = Image(source=os.path.join(Constants.ROOT_DIR, "images/marble-chessboard.jpg"))
-        self.board_image.pos = (100, 0)
+        self.board_image.pos = (0, 0)
         self.board_image.size = (600, 600)
         self.add_widget(self.board_image)
         self.fullscreen = False
@@ -92,24 +96,56 @@ class ChessGame(Layout):
         self.piece_translation('b', False)
         self.game_ended = False
         self.promoted_pawn = None
+
         self.pgn_board = chess.Board()
         self.fish = Stockfish(path="models/stockfish_14.1_win_x64_avx2.exe")
-        self.stockfish_evals = []
+        self.stockfish_evals = np.empty((1, 50))
+        self.stockfish_evals.fill(0)
         self.plot = MeshLinePlot(color=[1, 0, 0, 1])
-        self.add_widget(graph)
+        self.add_widget(graph_eval)
+        self.model = GameEvalInput()
+        weights_file = 'models/board_and_eval_model.pt'
+        self.model.load_state_dict(torch.load(weights_file, map_location=torch.device('cpu')))
+        self.model.eval()
+        self.elos = []
+        self.all_positions = np.empty((1, 50, 64))
+        for p in range(50):
+            self.all_positions[0, p, :] = (Utils.fen_to_board(self.pgn_board.fen()))
+        self.elo_label_white = Label(text='white elo = 0')
+        self.elo_label_black = Label(text='black elo = 0')
+        self.elo_label_white.pos = (650, 0)
+        self.elo_label_black.pos = (650, 50)
+        self.add_widget(self.elo_label_white)
+        self.add_widget(self.elo_label_black)
+        self.pindex = 1
+
+    def get_elo(self):
+        x = torch.from_numpy(self.stockfish_evals)
+        x2 = torch.from_numpy(self.all_positions)
+        t = self.model(x[None, :].float(), x2[None, :, :].float())
+        self.elos = t.detach().numpy()[0]
+        print(self.elos)
+        if not np.isnan(self.elos[0]):
+            self.elo_label_white.text = "white elo = " + str(round(self.elos[0]))
+            self.elo_label_black.text = "black elo = " + str(round(self.elos[1]))
 
     def get_pos_eval(self, fen: str):
         self.fish.set_fen_position(fen)
-        return self.fish.get_evaluation()['value'] / 100
+        return self.fish.get_evaluation()['value']  # TODO: / 100
 
     def schedule_eval(self):
         Clock.schedule_once(self.eval_pos, 0)
 
     def eval_pos(self, *args):
-        self.stockfish_evals.append(self.get_pos_eval(self.pgn_board.fen()))
-        print(self.stockfish_evals)
-        self.plot.points = [(x, y) for x, y in enumerate(self.stockfish_evals)]
-        graph.add_plot(self.plot)
+        self.stockfish_evals[0, self.pindex] = self.get_pos_eval(self.pgn_board.fen())
+        tmp = []
+        for i in range(self.pindex):
+            tmp.append((i, self.stockfish_evals[0, i]))
+        self.plot.points = tmp
+        graph_eval.add_plot(self.plot)
+        self.all_positions[0, self.pindex, :] = Utils.fen_to_board(self.pgn_board.fen())
+        self.pindex = self.pindex + 1
+        self.get_elo()
 
     def add_position(self):
         move = self.pgn_board.push_san(self.board.notation[-1])
@@ -198,13 +234,13 @@ class ChessGame(Layout):
         print(possible_moves)
         return sq in possible_moves
 
-    def update_game(self, piece: Piece, sq: str):
+    def update_game(self, piece: Piece, sq: str, castle: int):
         """
         :param piece: the piece played
         :param sq: the square to move to
         :return: updates the board and notation
         """
-        self.board.update_game(piece, sq)
+        self.board.update_game(piece, sq, castle)
 
     def end(self, color: str):
         """
@@ -261,6 +297,8 @@ class ChessGame(Layout):
         self.get_all_pieces_color(color).append(piece)
         self.pieces.append(piece)
         piece.set_square(piece.square)
+        self.board.notation[-1] += '=' + name
+        self.add_position()
 
         self.remove_widget(self.q)
         self.remove_widget(self.r)
