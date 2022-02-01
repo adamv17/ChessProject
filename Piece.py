@@ -93,7 +93,7 @@ class Piece(Scatter):
             if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
                                                   Utils.opposite_color(self.color)):
                 castle = self.check_special(sq)
-                captured = self.parent.board.update_game(self, sq, castle, self.get_unambigious(sq))
+                captured = self.parent.board.update_game(self, sq, castle, self.get_unambiguous(sq))
                 if captured != "-":
                     self.capture(sq)
 
@@ -201,7 +201,7 @@ class Piece(Scatter):
                 return 2
         return 2
 
-    def get_unambigious(self, sq):
+    def get_unambiguous(self, sq):
         if self.piece_name.upper() == 'N':
             pieces = self.parent.white_knights if self.is_white else self.parent.black_knights
         elif self.piece_name.upper() == 'R':
