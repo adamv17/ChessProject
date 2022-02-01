@@ -186,7 +186,7 @@ def cls_from_symbol(symbol: str, color: str, sq: str) -> object:
         return King(symbol, color, sq)
 
 
-def fen_to_board(fen):
+def fen_to_board(fen: str) -> np.array:
     board = []
     for row in fen.split('/'):
         brow = []
@@ -199,3 +199,10 @@ def fen_to_board(fen):
                 brow.append(ord(c))
         board.append(brow)
     return np.asarray(board).reshape(64, )
+
+
+def diff_squares(sq_main: str, sq_aux: str):
+    if sq_main[0] != sq_aux[0]:
+        return sq_main[0]
+    if sq_main[1] != sq_aux[1]:
+        return sq_main[1]
