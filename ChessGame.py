@@ -41,6 +41,7 @@ graph_eval = Graph(
     size=(200, 200)
 )
 
+
 class ChessGame(Layout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -65,6 +66,7 @@ class ChessGame(Layout):
         self.white_pieces = []
         self.black_pieces = []
         self.white_rooks = []
+        self.white_knights = []
         squares = list(Constants.START_POSITION.keys())
         # initialize white pieces
         for wsq in squares[0:16]:
@@ -74,6 +76,8 @@ class ChessGame(Layout):
                 self.white_king = piece
             if name == 'R':
                 self.white_rooks.append(piece)
+            if name == 'N':
+                self.white_knights.append(piece)
             self.white_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
@@ -81,6 +85,7 @@ class ChessGame(Layout):
 
         # initialize black pieces
         self.black_rooks = []
+        self.black_knights = []
         for bsq in squares[48:64]:
             name = Constants.START_POSITION[bsq]
             piece = Utils.cls_from_symbol(name, 'b', bsq)
@@ -88,6 +93,8 @@ class ChessGame(Layout):
                 self.black_king = piece
             if name == 'r':
                 self.black_rooks.append(piece)
+            if name == 'n':
+                self.black_knights.append(piece)
             self.black_pieces.append(piece)
             self.pieces.append(piece)
             self.add_widget(piece)
