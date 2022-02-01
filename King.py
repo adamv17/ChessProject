@@ -63,7 +63,7 @@ class King(Piece):
     def short(self, board):
         squares = ['f8', 'g8']
         self.rook_short = self.parent.black_rooks[1]
-        if self.color == 'w':
+        if self.is_white:
             squares = ['f1', 'g1']
             self.rook_short = self.parent.white_rooks[1]
         return board.is_square_empty(squares[0]) and board.is_square_empty(
@@ -72,16 +72,15 @@ class King(Piece):
     def long(self, board):
         squares = ['d8', 'c8', 'b8']
         self.rook_long = self.parent.black_rooks[0]
-        if self.color == 'w':
+        if self.is_white:
             squares = ['d1', 'c1', 'b1']
             self.rook_long = self.parent.white_rooks[0]
         return board.is_square_empty(squares[0]) and board.is_square_empty(squares[1]) and board.is_square_empty(
             squares[2]) and not self.rook_long.has_been_played
 
     def castle(self, board, possible_moves):
-        is_white = self.color == 'w'
         if not self.has_been_played:
             if self.short(board):
-                possible_moves.append('g1' if is_white else 'g8')
+                possible_moves.append('g1' if self.is_white else 'g8')
             if self.long(board):
-                possible_moves.append('c1' if is_white else 'c8')
+                possible_moves.append('c1' if self.is_white else 'c8')

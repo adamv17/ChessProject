@@ -18,12 +18,11 @@ class Piece(Scatter):
         self.piece_name = piece_name
         self.color = color
         self.square = square
-        try:
+        self.is_white = color == 'w'
+        if not piece_name == 'super piece':
             image = Image(source=Constants.PIECES[piece_name])
             image.size = (80, 80)
             self.add_widget(image)
-        except KeyError:
-            print(f"{piece_name} initialized: {self}")
         self.moved = False
         self.has_been_played = False
 
@@ -94,7 +93,7 @@ class Piece(Scatter):
             if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
                                                   Utils.opposite_color(self.color)):
                 castle = self.check_special(sq)
-                captured = self.parent.board.update_game(self, sq, castle)
+                captured = self.parent.board.update_game(self, sq, castle, self.get_unambigious(sq))
                 if captured != "-":
                     self.capture(sq)
 
@@ -202,4 +201,16 @@ class Piece(Scatter):
                 return 2
         return 2
 
+    def get_unambigious(self, sq):
+        if self.piece_name.upper() == 'N':
+            pieces = self.parent.white_knights if self.is_white else self.parent.black_knights
+        elif self.piece_name.upper() == 'R':
+            pieces = self.parent.white_rooks if is_white else self.parent.black_rooks
+        else:
+            return None
 
+        other: Piece = pieces[0] if self.square == pieces[1].square else pieces[1]
+        moves = other.moves(self.parent.board, other.square)
+        if sq in moves:
+            return Utils.diff_squares(self.square, other.square)
+        return None

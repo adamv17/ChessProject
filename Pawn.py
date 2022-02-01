@@ -10,13 +10,12 @@ class Pawn(Piece):
     def moves(self, board: Board, sq: str) -> list:
         idx: tuple = Utils.get_index(sq)
         row: int = idx[0] - 1
-        is_white = self.color == 'w'
-        if is_white:
+        if self.is_white:
             row: int = idx[0] + 1
         possible_sq: list = [[row, idx[1]], [row, idx[1] - 1], [row, idx[1] + 1]]
-        if idx[0] == 1 and is_white:
+        if idx[0] == 1 and self.is_white:
             possible_sq.append([idx[0] + 2, idx[1]])
-        elif idx[0] == 6 and not is_white:
+        elif idx[0] == 6 and not self.is_white:
             possible_sq.append([idx[0] - 2, idx[1]])
         possible_moves = [board.sq_board[square[0]][square[1]] for square in possible_sq if
                           Utils.borders(square[0]) and Utils.borders(square[1])]
@@ -46,7 +45,7 @@ class Pawn(Piece):
         last_move = board.notation[-1]
         if len(last_move) != 2:
             return False
-        if self.color == 'w':
+        if self.is_white:
             return last_move[0] + str(int(last_move[1]) + 1) == sq and board.is_square_empty(sq)
         return last_move[0] + str(int(last_move[1]) - 1) == sq and board.is_square_empty(sq)
 
