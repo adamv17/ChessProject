@@ -5,6 +5,7 @@ import chess.pgn
 import torch
 import numpy as np
 import bz2
+import Utils
 
 
 def get_eval():
@@ -53,7 +54,7 @@ def get_board_positions():
         board = game.board()
         start_pos = board
         for k in range(50):
-            b = fen_to_board(board.fen())
+            b = Utils.fen_to_board(board.fen())
             x2_np[i, k, :] = b
             try:
                 game = game.next()
@@ -65,21 +66,6 @@ def get_board_positions():
     print(x2_np)
     x2 = torch.from_numpy(x2_np)
     torch.save(x2, 'X2.pt')
-
-
-def fen_to_board(fen):
-    board = []
-    for row in fen.split('/'):
-        brow = []
-        for c in row:
-            if c == ' ':
-                break
-            elif c in '12345678':
-                brow.extend([0] * int(c))
-            elif c > 'Z' or 'A' < c < 'Z':
-                brow.append(ord(c))
-        board.append(brow)
-    return np.asarray(board).reshape(64, )
 
 
 def get_lichess(num_to_run: int):
