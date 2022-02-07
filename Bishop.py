@@ -8,7 +8,7 @@ class Bishop(Piece):
     def __init__(self, piece_name, color, square):
         super().__init__(piece_name, color, square)
 
-    def moves(self, board: Board, sq: str) -> list:
+    def moves(self, board: Board, sq: str) -> (list, False):
         """
         :param board: the current board position
         :param sq: the current square of the piece
@@ -28,7 +28,7 @@ class Bishop(Piece):
         if len(sec_d) != 0:
             self.add_possible_moves(board, sq, possible_moves, Utils.split(sec_d, sq))
 
-        return possible_moves
+        return possible_moves, False
 
     @staticmethod
     def get_k_diag(board: np.array, k: int) -> np.array:

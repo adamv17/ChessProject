@@ -208,13 +208,13 @@ class ChessGame(Layout):
         :return: true if the square is attacked otherwise false
         """
         super_piece = Piece('super piece', Utils.opposite_color(color), sq)
-        attackers = Knight.moves(super_piece, board, sq)
+        attackers, _ = Knight.moves(super_piece, board, sq)
         knight = Utils.get_piece_name('N', color)
         for attack_sq in attackers:
             if board.position[attack_sq] == knight:
                 return True
 
-        attackers = Bishop.moves(super_piece, board, sq)
+        attackers, _ = Bishop.moves(super_piece, board, sq)
         queen = Utils.get_piece_name('Q', color)
         bishop = Utils.get_piece_name('B', color)
         for attack_sq in attackers:
@@ -223,7 +223,7 @@ class ChessGame(Layout):
                 return True
 
         rook = Utils.get_piece_name('R', color)
-        attackers = Rook.moves(super_piece, board, sq)
+        attackers, _ = Rook.moves(super_piece, board, sq)
         for attack_sq in attackers:
             p = board.position[attack_sq]
             if p == rook or p == queen:
@@ -231,23 +231,26 @@ class ChessGame(Layout):
 
         return False
 
-    def legal_move(self, piece: Piece, sq: str) -> bool:
+    def legal_move(self, piece: Piece, sq: str) -> (bool, bool):
         """
         :param piece: the piece trying to move
         :param sq: the square the piece wants to move to
         :return: true if the move is legal otherwise false
         """
-        possible_moves = piece.moves(self.board, piece.square)
+        possible_moves, en_passant = piece.moves(self.board, piece.square)
         print(possible_moves)
-        return sq in possible_moves
+        return sq in possible_moves, en_passant
 
-    def update_game(self, piece: Piece, sq: str, castle: int):
+    def update_game(self, piece: Piece, sq: str, castle: int, unambiguous: str, en_passant: bool):
         """
+        :param en_passant:
+        :param castle:
+        :param unambiguous:
         :param piece: the piece played
         :param sq: the square to move to
         :return: updates the board and notation
         """
-        self.board.update_game(piece, sq, castle)
+        self.board.update_game(piece, sq, castle, unambiguous, en_passant)
 
     def end(self, color: str):
         """

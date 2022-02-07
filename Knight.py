@@ -8,7 +8,7 @@ class Knight(Piece):
     def __init__(self, piece_name, color, square):
         super().__init__(piece_name, color, square)
 
-    def moves(self, board: Board, sq: str) -> list:
+    def moves(self, board: Board, sq: str) -> (list, False):
         """
         :param board: the current board position
         :param sq: the current square of the piece
@@ -22,4 +22,4 @@ class Knight(Piece):
             if Utils.borders(move[0]) and Utils.borders(move[1]):
                 moves.append(board.sq_board[move[0]][move[1]])
 
-        return self.filter_possible_moves(board, moves, False)
+        return self.filter_possible_moves(board, moves, False), False

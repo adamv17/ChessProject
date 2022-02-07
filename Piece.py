@@ -86,14 +86,15 @@ class Piece(Scatter):
         :return: moves the piece if it is legal then returns true otherwise false
         """
         sq: str = self.get_close_square()
-        if self.parent.legal_move(self, sq):
+        legal, en_passant = self.parent.legal_move(self, sq)
+        if legal:
             board = copy.deepcopy(self.parent.board)
             board.update_position(self, sq)
             d = Utils.invert_dict(board.position)
             if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
                                                   Utils.opposite_color(self.color)):
                 castle = self.check_special(sq)
-                captured = self.parent.board.update_game(self, sq, castle, self.get_unambiguous(sq))
+                captured = self.parent.board.update_game(self, sq, castle, self.get_unambiguous(sq), en_passant)
                 if captured != "-":
                     self.capture(sq)
 
@@ -189,7 +190,6 @@ class Piece(Scatter):
         return filtered
 
     def check_special(self, sq):
-        x = 5
         if self.piece_name.upper() == 'K' and self.square == self.start_sq:
             if sq[0] == 'g':
                 self.rook_short.castle_rook()
@@ -210,7 +210,7 @@ class Piece(Scatter):
             return None
 
         other: Piece = pieces[0] if self.square == pieces[1].square else pieces[1]
-        moves = other.moves(self.parent.board, other.square)
+        moves, _ = other.moves(self.parent.board, other.square)
         if sq in moves:
             return Utils.diff_squares(self.square, other.square)
         return None

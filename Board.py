@@ -17,20 +17,21 @@ class Board:
         self.sq_board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
-    def update_game(self, piece, square: str, castle: int, unambiguous: str) -> str:
+    def update_game(self, piece, square: str, castle: int, unambiguous: str, en_passant: bool) -> str:
         """
+        :param en_passant:
         :param castle:
         :param unambiguous:
         :param piece: the piece played
         :param square: the square to move to
         :return: updates the board and notation
         """
-        captured_piece, captured, tmp = self.update_position(piece, square)
+        captured_piece, captured, tmp = self.update_position(piece, square[0] + piece.square[1])
         piece.update_square(square)
         notation_move: str = Utils.board_to_notation(
             piece.piece_name.upper(),
-            [square, tmp[0] if piece.piece_name.upper() == 'P' and captured else unambiguous],
-            [False, captured, False, False],
+            [square if not en_passant else square[0] + tmp[1], tmp[0] if piece.piece_name.upper() == 'P' and (captured or en_passant) else unambiguous],
+            [False, captured or en_passant, False, False],
             castle, ''
         )
         self.update_notation(notation_move)

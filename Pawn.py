@@ -7,39 +7,42 @@ class Pawn(Piece):
     def __init__(self, piece_name, piece_color, square):
         super().__init__(piece_name, piece_color, square)
 
-    def moves(self, board: Board, sq: str) -> list:
+    def moves(self, board: Board, sq: str) -> (list, bool):
+        en_passant = False
         idx: tuple = Utils.get_index(sq)
         row: int = idx[0] - 1
+        sign = -1
         if self.is_white:
+            sign = 1
             row: int = idx[0] + 1
         possible_sq: list = [[row, idx[1]], [row, idx[1] - 1], [row, idx[1] + 1]]
-        if idx[0] == 1 and self.is_white:
-            possible_sq.append([idx[0] + 2, idx[1]])
-        elif idx[0] == 6 and not self.is_white:
-            possible_sq.append([idx[0] - 2, idx[1]])
-        possible_moves = [board.sq_board[square[0]][square[1]] for square in possible_sq if
-                          Utils.borders(square[0]) and Utils.borders(square[1])]
-        sq_en = [None, None]
-        en = [False, False]
-        for i in range(1, 3):
-            try:
-                en[i - 1] = self.en_passant(board, possible_moves[i])
-                sq_en[i - 1] = possible_moves[i]
-            except IndexError:
-                en[i - 1] = False
-        for i, m in enumerate(possible_moves):
-            if abs(Utils.get_index(m)[1] - idx[1]) == 1 and board.is_square_empty(m):
-                del possible_moves[i]
-        possible_moves = self.filter_possible_moves(board, possible_moves, False)
+        if not self.has_been_played:
+            if idx[0] == 1 and self.is_white:
+                possible_sq.append([idx[0] + 2, idx[1]])
+            elif idx[0] == 6 and not self.is_white:
+                possible_sq.append([idx[0] - 2, idx[1]])
 
-        if en[0]:
-            possible_moves.append(sq_en[0])
-        if en[1]:
-            possible_moves.append(sq_en[1])
+        possible_moves = []
+        for index, square in enumerate(possible_sq):
+            if Utils.borders(square[0]) and Utils.borders(square[1]):
+                move = board.sq_board[square[0]][square[1]]
+                if index == 1 or index == 2:
+                    if self.en_passant(board, move):
+                        possible_moves.append(move)
+                        en_passant = True
+                    if Utils.get_color_piece(board.position[move]) != self.color and \
+                            not board.is_square_empty(move):
+                        possible_moves.append(move)
+                if index == 0:
+                    if board.is_square_empty(move):
+                        possible_moves.append(move)
+                if index == 3:
+                    if board.is_square_empty(move) and board.is_square_empty(move[0] + str(int(move[1])-sign)):
+                        possible_moves.append(move)
 
-        return possible_moves
+        return possible_moves, en_passant
 
-    def en_passant(self, board: Board, sq: str):
+    def en_passant(self, board: Board, sq: str) -> bool:
         if not board.notation:
             return False
         last_move = board.notation[-1]
