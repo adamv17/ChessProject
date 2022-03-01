@@ -24,7 +24,7 @@ def get_eval():
                     inp = int(lst[j])
                 game[0, j] = inp
         l[i] = game
-
+    print(l)
     x = torch.from_numpy(l)
     torch.save(x, 'X.pt')
 
@@ -75,3 +75,5 @@ def get_lichess(num_to_run: int):
         game = chess.pgn.read_game(games)
         board = game.board()
         eval = game.eval()
+
+get_eval()

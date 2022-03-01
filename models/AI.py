@@ -12,6 +12,9 @@ import Model
 import Constants
 import time
 import csv
+import torchvision
+import torchvision.transforms as transforms
+from torch.utils.tensorboard import SummaryWriter
 
 
 def split_train_test(x1, x2, y, train_percentage=0.8):
@@ -25,7 +28,7 @@ def split_train_test(x1, x2, y, train_percentage=0.8):
         writer.writerow(test_indices)
 
     return x1[train_indices], x2[train_indices], y[train_indices], \
-        x1[test_indices], x2[test_indices], y[test_indices]
+           x1[test_indices], x2[test_indices], y[test_indices]
 
 
 def train(model, Xin1, Xin2, Y, learning_rate=1e-3, epochs=2000, batch_size=128):
@@ -78,6 +81,10 @@ def test(model, weights_file, X, X2, Y):
         x2 = X2[i].float()
         x2 = x2[None, :, :]
         y_hat = model(x.cuda(), x2.cuda()).detach().numpy()[0]
+        if i == 0:
+            tb = SummaryWriter()
+            tb.add_graph(model, [x.cuda(), x2.cuda()])
+            tb.close()
         print(y_hat)
         y_actual = Y[i].float().detach().numpy()
         div_white = y_hat[0] - y_actual[0]
@@ -90,29 +97,86 @@ def test(model, weights_file, X, X2, Y):
             f'prediction = {y_hat}, actual = {y_actual}, '
             f'div white = {div_white}, div black = {div_black}'
         )
-    str_res = f'\nstatistics: \nstd white = {np.std(divs_white)}, std black = {np.std(divs_black)} \n'\
-        f'mean white = {np.mean(divs_white)}, mean black = {np.mean(divs_black)} \n' \
-        f'max white = {np.max(divs_white)}, max black = {np.max(divs_black)} \n' \
-        f'min white = {np.min(divs_white)}, min black = {np.min(divs_black)}'
+    str_res = f'\nstatistics: \nstd white = {np.std(divs_white)}, std black = {np.std(divs_black)} \n' \
+              f'mean white = {np.mean(divs_white)}, mean black = {np.mean(divs_black)} \n' \
+              f'max white = {np.max(divs_white)}, max black = {np.max(divs_black)} \n' \
+              f'min white = {np.min(divs_white)}, min black = {np.min(divs_black)}'
     with open('results.txt', 'w') as res:
         res.write(str_res)
     print(str_res)
 
 
-x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt')).float()
-y_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/Y.pt')).float()
-x2_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X2.pt')).float()
+def train_dataloader_model(model, train_loader, learning_rate=1e-3, epochs=2000, batch_size=128):
+    device = ("cuda" if torch.cuda.is_available() else cpu)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    criterion = nn.MSELoss(reduction='sum')
 
+    tb = SummaryWriter()
+
+    for epoch in range(epochs):
+
+        total_loss = 0
+        total_correct = 0
+
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            preds = model(inputs)
+
+            loss = criterion(preds, labels)
+            total_loss += loss.item()
+            total_correct += get_num_correct(preds, labels)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        tb.add_scalar("Loss", total_loss, epoch)
+        tb.add_scalar("Correct", total_correct, epoch)
+        tb.add_scalar("Accuracy", total_correct / len(train_set), epoch)
+
+        tb.add_histogram("conv1.bias", model.conv1.bias, epoch)
+        tb.add_histogram("conv1.weight", model.conv1.weight, epoch)
+        tb.add_histogram("conv2.bias", model.conv2.bias, epoch)
+        tb.add_histogram("conv2.weight", model.conv2.weight, epoch)
+
+        tb.add_hparams(
+            {"lr": learning_rate, "bsize": batch_size, "shuffle": shuffle},
+            {
+                "accuracy": total_correct / len(train_set),
+                "loss": total_loss,
+            },
+        )
+
+        print("epoch:", epoch, "total_correct:", total_correct, "loss:", total_loss)
+
+    tb.close()
+
+
+def get_num_correct(preds, labels):
+    return preds.argmax(dim=1).eq(labels).sum().item()
+
+
+# x_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X.pt')).float()
+# y_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/Y.pt')).float()
+# x2_data = torch.load(os.path.join(Constants.ROOT_DIR, 'data/X2.pt')).float()
+#
 # train_x, train_x2, train_y, test_x, test_x2, test_y = split_train_test(x_data, x2_data, y_data)
 #
-ai_model = Model.GameEvalInput()
+# ai_model = Model.GameEvalInput()
 #
-# train(ai_model, train_x, train_x2, train_y)
+# test(ai_model, 'slow_cnn_20k_model.pt', test_x, test_x2, test_y)
+print(torch.__version__)
+train_set = torchvision.datasets.FashionMNIST(root="./data",
+                                              train=True,
+                                              download=True,
+                                              transform=transforms.ToTensor())
+train_loader = torch.utils.data.DataLoader(train_set,batch_size = 100, shuffle = True)
+# train_dataloader_model()
 
-with open('indices.csv') as csvfile:
-    r = csvfile.readline(-1)
-    l = r.split(",")
-    t = [int(x) for x in l]
-    ind = np.asarray(t)
-x = 5
-test(ai_model, 'board_and_eval_model.pt', x_data, x2_data, y_data)
+tb = SummaryWriter()
+model = Model.CNN()
+images, labels = next(iter(train_loader))
+grid = torchvision.utils.make_grid(images)
+tb.add_image("images", grid)
+tb.add_graph(model, images)
+tb.close()
