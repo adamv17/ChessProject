@@ -111,7 +111,7 @@ class ChessGame(Layout):
         self.plot = MeshLinePlot(color=[1, 0, 0, 1])
         self.add_widget(graph_eval)
         self.model = GameEvalInput()
-        weights_file = 'models/board_and_eval_model.pt'
+        weights_file = 'models/eval_game_model.pt'
         self.model.load_state_dict(torch.load(weights_file, map_location=torch.device('cpu')))
         self.model.eval()
         self.elos = []
@@ -138,7 +138,7 @@ class ChessGame(Layout):
 
     def get_pos_eval(self, fen: str):
         self.fish.set_fen_position(fen)
-        return self.fish.get_evaluation()['value']  # TODO: / 100
+        return self.fish.get_evaluation()['value']
 
     def schedule_eval(self):
         Clock.schedule_once(self.eval_pos, 0)
