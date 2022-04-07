@@ -19,27 +19,9 @@ import chess
 from stockfish import Stockfish
 from kivy.clock import Clock
 from matplotlib import pyplot as plt
-from kivy.garden.graph import Graph, MeshLinePlot
 import torch
-from models.Model import GameEvalInput
-
-graph_eval = Graph(
-    xlabel='Moves',
-    ylabel='Evals',
-    x_ticks_major=1,
-    y_ticks_major=100,
-    y_grid_label=True,
-    x_grid_label=True,
-    padding=5,
-    xlog=False,
-    ylog=False,
-    x_grid=True,
-    y_grid=True,
-    ymin=-300,
-    ymax=300,
-    pos=(600, 400),
-    size=(200, 200)
-)
+from models.Model import EloNN
+import copy
 
 
 class ChessGame(Layout):
@@ -58,8 +40,6 @@ class ChessGame(Layout):
         self.board_image.pos = (0, 0)
         self.board_image.size = (600, 600)
         self.add_widget(self.board_image)
-        self.fullscreen = False
-        # Window.bind(on_resize=self.window_resize)
         self.coord = Utils.get_coord(Constants.DELTA_SQUARE, Constants.XY_FIRST_SQUARE)
 
         self.pieces = []
@@ -106,35 +86,24 @@ class ChessGame(Layout):
 
         self.pgn_board = chess.Board()
         self.fish = Stockfish(path="models/stockfish_14.1_win_x64_avx2.exe")
-        self.stockfish_evals = np.empty((1, 50))
+        self.stockfish_evals = np.empty((1, 100))
         self.stockfish_evals.fill(0)
-        self.plot = MeshLinePlot(color=[1, 0, 0, 1])
-        self.add_widget(graph_eval)
-        self.model = GameEvalInput()
-        weights_file = 'models/eval_game_model.pt'
+        self.model = EloNN()
+        weights_file = 'models/eval_game_model_100_v2.pt'
         self.model.load_state_dict(torch.load(weights_file, map_location=torch.device('cpu')))
         self.model.eval()
         self.elos = []
-        self.all_positions = np.empty((1, 50, 64))
-        for p in range(50):
+        self.all_positions = np.empty((1, 100, 64))
+        for p in range(100):
             self.all_positions[0, p, :] = (Utils.fen_to_board(self.pgn_board.fen()))
-        self.elo_label_white = Label(text='white elo = 0')
-        self.elo_label_black = Label(text='black elo = 0')
-        self.elo_label_white.pos = (650, 0)
-        self.elo_label_black.pos = (650, 50)
-        self.add_widget(self.elo_label_white)
-        self.add_widget(self.elo_label_black)
         self.pindex = 1
 
     def get_elo(self):
         x = torch.from_numpy(self.stockfish_evals)
         x2 = torch.from_numpy(self.all_positions)
         t = self.model(x[None, :].float(), x2[None, :, :].float())
-        self.elos = t.detach().numpy()[0]
+        self.elos.append(t.detach().numpy()[0])
         print(self.elos)
-        if not np.isnan(self.elos[0]):
-            self.elo_label_white.text = "white elo = " + str(round(self.elos[0]))
-            self.elo_label_black.text = "black elo = " + str(round(self.elos[1]))
 
     def get_pos_eval(self, fen: str):
         self.fish.set_fen_position(fen)
@@ -144,43 +113,19 @@ class ChessGame(Layout):
         Clock.schedule_once(self.eval_pos, 0)
 
     def eval_pos(self, *args):
-        self.stockfish_evals[0, self.pindex] = self.get_pos_eval(self.pgn_board.fen())
-        tmp = []
-        for i in range(self.pindex):
-            tmp.append((i, self.stockfish_evals[0, i]))
-        self.plot.points = tmp
-        graph_eval.add_plot(self.plot)
-        self.all_positions[0, self.pindex, :] = Utils.fen_to_board(self.pgn_board.fen())
-        self.pindex = self.pindex + 1
-        self.get_elo()
+        if self.pindex != 100:
+            self.stockfish_evals[0, self.pindex] = self.get_pos_eval(self.pgn_board.fen())
+            self.all_positions[0, self.pindex, :] = Utils.fen_to_board(self.pgn_board.fen())
+            self.pindex = self.pindex + 1
+            self.get_elo()
+        else:
+            print("sorry ran out of space")
 
     def add_position(self):
         move = self.pgn_board.push_san(self.board.notation[-1])
         print(self.pgn_board)
         if not self.pgn_board.is_checkmate():
             self.schedule_eval()
-
-    def window_resize(self, *event):
-        """
-        :param event: the resize event data
-        :return: resize the pieces and board to fit the screen
-        """
-        if not self.fullscreen:
-            scale = 1 + 50 / 600
-            self.board_image.pos = (300, 0)
-            self.board_image.size = (655, 655)
-            self.coord = Utils.get_coord(Constants.DELTA_SQUARE_FULL, Constants.XY_FIRST_SQUARE_FULL)
-        else:
-            scale = 1
-            self.board_image.pos = (100, 0)
-            self.board_image.size = (600, 600)
-            self.coord = Utils.get_coord(Constants.DELTA_SQUARE, Constants.XY_FIRST_SQUARE)
-        for p in self.pieces:
-            p.scale = scale  # scales the pieces
-            p.move_to_square("-")  # moves the pieces to their original places
-
-        self.fullscreen = not self.fullscreen
-        print("size changed")
 
     def piece_translation(self, color: str, translate: bool):
         """
@@ -208,13 +153,13 @@ class ChessGame(Layout):
         :return: true if the square is attacked otherwise false
         """
         super_piece = Piece('super piece', Utils.opposite_color(color), sq)
-        attackers, _ = Knight.moves(super_piece, board, sq)
+        attackers = Knight.moves(super_piece, board, sq)
         knight = Utils.get_piece_name('N', color)
         for attack_sq in attackers:
             if board.position[attack_sq] == knight:
                 return True
 
-        attackers, _ = Bishop.moves(super_piece, board, sq)
+        attackers = Bishop.moves(super_piece, board, sq)
         queen = Utils.get_piece_name('Q', color)
         bishop = Utils.get_piece_name('B', color)
         for attack_sq in attackers:
@@ -223,7 +168,7 @@ class ChessGame(Layout):
                 return True
 
         rook = Utils.get_piece_name('R', color)
-        attackers, _ = Rook.moves(super_piece, board, sq)
+        attackers = Rook.moves(super_piece, board, sq)
         for attack_sq in attackers:
             p = board.position[attack_sq]
             if p == rook or p == queen:
@@ -237,11 +182,31 @@ class ChessGame(Layout):
         :param sq: the square the piece wants to move to
         :return: true if the move is legal otherwise false
         """
-        possible_moves, en_passant = piece.moves(self.board, piece.square)
+        possible_moves = piece.moves(self.board, piece.square)
         print(possible_moves)
-        return sq in possible_moves, en_passant
 
-    def update_game(self, piece: Piece, sq: str, castle: int, unambiguous: str, en_passant: bool):
+        return sq in possible_moves and not self.is_in_check_after_move(piece, sq)
+
+    def is_in_check_after_move(self, piece: Piece, sq: str):
+        board = copy.deepcopy(self.board)
+        board.update_position(piece, sq)
+        d = Utils.invert_dict(board.position)
+        is_attacked = self.is_square_attacked(board, d[Utils.get_piece_name("K", piece.color)],
+                                              Utils.opposite_color(piece.color))
+        return is_attacked
+
+    def legal_move_present(self, color: str) -> bool:
+        pieces = self.get_all_pieces_color(color)
+        for p in pieces:
+            mv = p.moves(self.board, p.square)
+            for m in mv:
+                if self.legal_move(p, m):
+                    print(m)
+                    return True
+
+        return False
+
+    def update_game(self, piece: Piece, sq: str, castle: int, unambiguous: str):
         """
         :param en_passant:
         :param castle:
@@ -250,7 +215,7 @@ class ChessGame(Layout):
         :param sq: the square to move to
         :return: updates the board and notation
         """
-        self.board.update_game(piece, sq, castle, unambiguous, en_passant)
+        self.board.update_game(piece, sq, castle, unambiguous)
 
     def end(self, color: str):
         """
@@ -266,19 +231,12 @@ class ChessGame(Layout):
                                 size=(400, 400), auto_dismiss=True)
             popupWindow.open()
 
-    def remove_piece(self, pieces: list, sq: str) -> Piece:
-        cp: Piece = None
-        i = 0
+    def remove_piece(self, piece: Piece):
+        pieces = self.get_all_pieces_color(piece.color)
         for i, p in enumerate(pieces):
-            if p.square == sq:
-                cp = pieces.pop(i)
+            if p.square == piece.square:
+                pieces.pop(i)
                 break
-        pps = self.get_all_pieces_color(cp.color)
-        if cp.color == 'w':
-            pps.pop(i)
-        else:
-            pps.pop(i - len(pieces))
-        return cp
 
     def promotion(self, piece):
         self.piece_translation('b', False)
@@ -286,7 +244,7 @@ class ChessGame(Layout):
         self.promotion_graphics()
         self.promoted_pawn = piece
         self.remove_widget(piece)
-        self.remove_piece(self.get_all_pieces_color(piece.color), piece.square)
+        self.remove_piece(piece)
 
     def promotion_graphics(self):
         self.q.bind(on_press=self.on_click)

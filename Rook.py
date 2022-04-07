@@ -19,7 +19,7 @@ class Rook(Piece):
             else:
                 self.castling_sq = 'd8'
 
-    def moves(self, board: Board, sq: str) -> (list, False):
+    def moves(self, board: Board, sq: str) -> list:
         """
         :param board: the current board position
         :param sq: the current square of the piece
@@ -31,7 +31,7 @@ class Rook(Piece):
         possible_moves = []
         self.add_possible_moves(board, sq, possible_moves, Utils.split(row, sq))
         self.add_possible_moves(board, sq, possible_moves, Utils.split(col, sq))
-        return possible_moves, False
+        return possible_moves
 
     def castle_rook(self):
         self.parent.board.update_position(self, self.castling_sq)

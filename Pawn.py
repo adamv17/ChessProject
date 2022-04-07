@@ -6,9 +6,10 @@ from Piece import Piece
 class Pawn(Piece):
     def __init__(self, piece_name, piece_color, square):
         super().__init__(piece_name, piece_color, square)
+        self.possible_en_passant = '-'
 
-    def moves(self, board: Board, sq: str) -> (list, bool):
-        en_passant = False
+    def moves(self, board: Board, sq: str) -> list:
+        self.possible_en_passant = '-'
         idx: tuple = Utils.get_index(sq)
         row: int = idx[0] - 1
         sign = -1
@@ -29,7 +30,7 @@ class Pawn(Piece):
                 if index == 1 or index == 2:
                     if self.en_passant(board, move):
                         possible_moves.append(move)
-                        en_passant = True
+                        self.possible_en_passant = move
                     if Utils.get_color_piece(board.position[move]) != self.color and \
                             not board.is_square_empty(move):
                         possible_moves.append(move)
@@ -40,7 +41,7 @@ class Pawn(Piece):
                     if board.is_square_empty(move) and board.is_square_empty(move[0] + str(int(move[1])-sign)):
                         possible_moves.append(move)
 
-        return possible_moves, en_passant
+        return possible_moves
 
     def en_passant(self, board: Board, sq: str) -> bool:
         if not board.notation:

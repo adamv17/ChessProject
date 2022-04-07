@@ -91,18 +91,53 @@ class CNN(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5)
         self.conv2 = nn.Conv2d(in_channels=6, out_channels=12, kernel_size=5)
 
-        self.fc1 = nn.Linear(in_features=12*4*4, out_features=120)
+        self.fc1 = nn.Linear(in_features=12 * 4 * 4, out_features=120)
         self.fc2 = nn.Linear(in_features=120, out_features=60)
         self.out = nn.Linear(in_features=60, out_features=10)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
-        x = F.max_pool2d(x, kernel_size = 2, stride = 2)
+        x = F.max_pool2d(x, kernel_size=2, stride=2)
         x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, kernel_size = 2, stride = 2)
-        x = torch.flatten(x,start_dim = 1)
+        x = F.max_pool2d(x, kernel_size=2, stride=2)
+        x = torch.flatten(x, start_dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.out(x)
 
         return x
+
+
+class EloNN(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.evl = torch.nn.Sequential(
+            torch.nn.Conv1d(in_channels=1, out_channels=200, kernel_size=20),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Flatten(),
+            torch.nn.Linear(in_features=16200, out_features=50),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(in_features=50, out_features=50),
+            torch.nn.ReLU(inplace=True),
+        )
+        self.game = torch.nn.Sequential(
+            torch.nn.Linear(in_features=64, out_features=512),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(in_features=512, out_features=128),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(in_features=128, out_features=64),
+            torch.nn.ReLU(inplace=True)
+        )
+        self.fc_combine = torch.nn.Sequential(
+            torch.nn.Linear(in_features=6450, out_features=100),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Linear(in_features=100, out_features=2),
+        )
+
+    def forward(self, input1, input2):
+        e = self.evl(input1)
+        g = self.game(input2)
+        combined = torch.cat((g.view(g.size(0), -1),
+                              e.view(e.size(0), -1)), dim=1)
+        out = self.fc_combine(combined)
+        return out

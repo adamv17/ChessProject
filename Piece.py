@@ -77,37 +77,38 @@ class Piece(Scatter):
         :param sq: the square of the piece to capture
         :return: removes the piece
         """
-        for p in self.parent.pieces:
+        for i, p in enumerate(self.parent.pieces):
             if p.square == sq and self.color != p.color:
                 self.parent.remove_widget(p)
+                self.parent.remove_piece(p)
+                self.parent.pieces.pop(i)
 
     def move(self) -> (bool, bool):
         """
         :return: moves the piece if it is legal then returns true otherwise false
         """
         sq: str = self.get_close_square()
-        legal, en_passant = self.parent.legal_move(self, sq)
-        if legal:
-            board = copy.deepcopy(self.parent.board)
-            board.update_position(self, sq)
-            d = Utils.invert_dict(board.position)
-            if not self.parent.is_square_attacked(board, d[Utils.get_piece_name("K", self.color)],
-                                                  Utils.opposite_color(self.color)):
-                castle = self.check_special(sq)
-                captured = self.parent.board.update_game(self, sq, castle, self.get_unambiguous(sq), en_passant)
-                if captured != "-":
-                    self.capture(sq)
+        last_sq = self.square
+        if self.parent.legal_move(self, sq):
+            castle = self.check_special(sq)
+            captured = self.parent.board.update_game(self, sq, castle, self.get_unambiguous(sq))
+            if captured != "-":
+                self.capture(sq)
 
-                played = False
-                promotion = False
-                if self.piece_name.upper() == 'P' and (
-                        Utils.get_index(self.square)[0] == 0 or Utils.get_index(self.square)[0] == 7):
-                    self.parent.promotion(self)
-                    promotion = True
-                else:
-                    played = self.move_to_square(sq)
-                    self.parent.end(self.color)
-                return played, promotion
+            played = False
+            promotion = False
+            if self.piece_name.upper() == 'P' and (
+                    Utils.get_index(self.square)[0] == 0 or Utils.get_index(self.square)[0] == 7):
+                self.parent.promotion(self)
+                promotion = True
+            else:
+                if self.piece_name.upper() == 'P' and self.possible_en_passant and last_sq[0] != sq[0]:
+                    cp_sq = sq[0] + str(int(sq[1]) + (-1) if self.is_white else 1)
+                    self.parent.board.position[cp_sq] = '-'
+                    self.capture(cp_sq)
+                played = self.move_to_square(sq)
+                self.parent.end(self.color)
+            return played, promotion
         self.set_square(self.square)
         return False, False
 
@@ -205,12 +206,12 @@ class Piece(Scatter):
         if self.piece_name.upper() == 'N':
             pieces = self.parent.white_knights if self.is_white else self.parent.black_knights
         elif self.piece_name.upper() == 'R':
-            pieces = self.parent.white_rooks if is_white else self.parent.black_rooks
+            pieces = self.parent.white_rooks if self.is_white else self.parent.black_rooks
         else:
             return None
 
         other: Piece = pieces[0] if self.square == pieces[1].square else pieces[1]
-        moves, _ = other.moves(self.parent.board, other.square)
+        moves = other.moves(self.parent.board, other.square)
         if sq in moves:
             return Utils.diff_squares(self.square, other.square)
         return None

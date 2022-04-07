@@ -12,7 +12,7 @@ class King(Piece):
         self.rook_short = None
         self.rook_long = None
 
-    def moves(self, board: Board, sq: str) -> (list, False):
+    def moves(self, board: Board, sq: str) -> list:
         """
         :param board: the current board position
         :param sq: the current square of the piece
@@ -26,7 +26,7 @@ class King(Piece):
             if Utils.borders(sq_row) and Utils.borders(sq_col):
                 possible_moves.append(board.sq_board[sq_row][sq_col])
         self.castle(board, possible_moves)
-        return self.filter_king_moves(board, self.filter_possible_moves(board, possible_moves, False)), False
+        return self.filter_king_moves(board, self.filter_possible_moves(board, possible_moves, False))
 
     def checkmate(self, board: Board) -> bool:
         """
@@ -34,8 +34,12 @@ class King(Piece):
         :return:
         """
         in_check: bool = self.parent.is_square_attacked(board, self.square, Utils.opposite_color(self.color))
+        if not in_check:
+            return False
         no_moves: bool = len(self.moves(board, self.square)) == 0
-        return in_check and no_moves
+        if not no_moves:
+            return False
+        return in_check and no_moves and not self.parent.legal_move_present(self.color)
 
     def can_move(self, board: Board, move):
         """

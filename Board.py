@@ -17,21 +17,20 @@ class Board:
         self.sq_board = Utils.dict_to_numpy(self.position)
         self.notation = []
 
-    def update_game(self, piece, square: str, castle: int, unambiguous: str, en_passant: bool) -> str:
+    def update_game(self, piece, square: str, castle: int, unambiguous: str) -> str:
         """
-        :param en_passant:
         :param castle:
         :param unambiguous:
         :param piece: the piece played
         :param square: the square to move to
         :return: updates the board and notation
         """
-        captured_piece, captured, tmp = self.update_position(piece, square[0] + piece.square[1])
+        captured_piece, captured, tmp = self.update_position(piece, square)
         piece.update_square(square)
         notation_move: str = Utils.board_to_notation(
             piece.piece_name.upper(),
-            [square if not en_passant else square[0] + tmp[1], tmp[0] if piece.piece_name.upper() == 'P' and (captured or en_passant) else unambiguous],
-            [False, captured or en_passant, False, False],
+            [square, tmp[0] if piece.piece_name.upper() == 'P' and captured else unambiguous],
+            [False, captured, False, False],
             castle, ''
         )
         self.update_notation(notation_move)
@@ -57,20 +56,6 @@ class Board:
         """
         self.notation.append(move)
         print(self.notation)
-
-    def reverse_move(self):
-        move = self.notation.pop(-1)
-        self.play_to_position(self.notation)
-
-    def play_to_position(self, notation: list):
-        self.position: dict = copy.deepcopy(Constants.START_POSITION)
-        for i, move in enumerate(notation):
-            name, squares, special, castle = Utils.notation_to_board(move, Utils.get_color(i + 1))
-            # TODO: continue writing this method
-    #
-    # def play_move(self, name: str, squares: list[str], special: list[bool], castle: int):
-    #     if castle == 2:
-    #         pass
 
     def is_square_empty(self, square: str) -> bool:
         """

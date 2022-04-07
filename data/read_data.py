@@ -11,11 +11,11 @@ import Utils
 def get_eval():
     data = pd.read_csv('stockfish.csv')
     arr = data['MoveScores'].values
-    l = np.empty((18000, 50))
+    l = np.empty((18000, 100))
     for i in range(18000):
         lst: list = arr[i].split(" ")
-        game = np.empty((1, 50))
-        for j in range(50):
+        game = np.empty((1, 100))
+        for j in range(100):
             if len(lst) <= j:
                 game[0, j] = 0
             else:
@@ -47,13 +47,13 @@ def get_elo():
 
 
 def get_board_positions():
-    x2_np = np.empty((18000, 50, 64))
+    x2_np = np.empty((18000, 100, 64))
     games = open('data.pgn')
     for i in range(18000):
         game = chess.pgn.read_game(games)
         board = game.board()
         start_pos = board
-        for k in range(50):
+        for k in range(100):
             b = Utils.fen_to_board(board.fen())
             x2_np[i, k, :] = b
             try:
@@ -76,4 +76,5 @@ def get_lichess(num_to_run: int):
         board = game.board()
         eval = game.eval()
 
+get_board_positions()
 get_eval()
